@@ -1,7 +1,7 @@
 {
   "_comment": "===== EXPERIMENT DIRECTORY =====",
   "_explanation": " Directory to load data from ",
-  "exp_dir": "/home/rfml/wifi/experiments/exp19",
+  "exp_dir": "dataset-directory",
 
   "_comment": "===== DATA CONFIGURATION =====",
   "_explanation": " --- ",

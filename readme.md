@@ -13,6 +13,7 @@ project
 └───cxnn
 │   │   train codes
 │   │   test codes
+│   │   architectures for adsb and wifi
 │   │   ...
 │   │ 
 │   └───complexnn
@@ -40,5 +41,9 @@ Since the implementation of complex valued neural networks is done on Keras with
 > tqdm                      4.28.1\
 > scikit-learn              0.20.3\
 > scipy                     1.1.0
+
+## Running the code #
+
+
 
 
