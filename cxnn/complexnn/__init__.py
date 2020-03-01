@@ -21,3 +21,5 @@ from   .norm  import LayerNormalization, ComplexLayerNorm
 from   .pool  import SpectralPooling1D, SpectralPooling2D
 from   .utils import (get_realpart, get_imagpart, getpart_output_shape,
                       GetImag, GetReal, GetAbs)
+
+from   .activations import Modrelu

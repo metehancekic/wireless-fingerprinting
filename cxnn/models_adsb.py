@@ -17,7 +17,7 @@ from keras.regularizers import l2
 from keras.engine.topology import Layer
 
 # # import complexnn
-from .complexnn import ComplexDense, ComplexConv1D, utils
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
 
 def RotateComplex(x, theta):
 
@@ -48,62 +48,6 @@ def RotateComplex(x, theta):
 	merged = Concatenate()([rotated_real, rotated_imag])
 
 	return merged
-
-
-def modrelu(x, b):
-	real = utils.GetReal()(x)
-	imag = utils.GetImag()(x)
-
-	abs1 = K.relu( utils.GetAbs()(x) )
-	abs2 = K.relu( utils.GetAbs()(x) - b )
-
-	
-	real = real * abs2 / (abs1+0.0000001)
-	imag = imag * abs2 / (abs1+0.0000001)
-
-	merged = Concatenate()([real, imag])
-
-	return merged
-
-class Modrelu(Layer):
-
-	def __init__(self, **kwargs):
-		super(Modrelu, self).__init__(**kwargs)
-
-	def build(self, input_shape):
-		# Create a trainable weight variable for this layer.
-		self._b = self.add_weight(name='b', 
-									shape=(input_shape[-1]//2,),
-									initializer='zeros',
-									trainable=True)
-		super(Modrelu, self).build(input_shape)  # Be sure to call this at the end
-
-	def call(self, x):
-		
-		real = utils.GetReal()(x)
-		imag = utils.GetImag()(x)
-
-		abs1 = K.relu( utils.GetAbs()(x) )
-		abs2 = K.relu( utils.GetAbs()(x) - self._b )
-
-		
-		real = real * abs2 / (abs1+0.0000001)
-		imag = imag * abs2 / (abs1+0.0000001)
-
-		merged = Concatenate()([real, imag])
-
-		return merged
-
-	def compute_output_shape(self, input_shape):
-		return input_shape
-
-def set_keras_backend(backend):
-	if K.backend() != backend:
-		os.environ['KERAS_BACKEND'] = backend
-		reload(K)
-		assert K.backend() == backend
-
-set_keras_backend("theano")
 
 
 def net_address_20(data_input, classes_num=10, weight_decay=1e-4):

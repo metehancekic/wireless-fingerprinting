@@ -25,14 +25,11 @@ from keras.regularizers import l2
 from keras.engine.topology import Layer
 
 
-from cxnn.complexnn import ComplexDense, ComplexConv1D, utils
-from cxnn.models_adsb import Modrelu, set_keras_backend
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
 
 import matplotlib as mpl
 mpl.rc('text', usetex=True)
 mpl.rc('text.latex', preamble = r'\usepackage{amsmath}, \usepackage{sfmath}, \usepackage{amssymb}, \usepackage{bm}, \DeclareMathOperator*{\supp}{supp}, \DeclareMathOperator*{\proj}{\mathcal{P}_K}, \newcommand{\be}{{\bm e}}, \newcommand{\bx}{{\bm x}}, \DeclareMathOperator*{\support}{\mathcal{S}_K}')
-
-set_keras_backend("theano")
 
 np.set_printoptions(precision=3)
 

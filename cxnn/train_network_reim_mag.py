@@ -16,18 +16,9 @@ from keras.layers import Dense, Input, Activation, Conv1D, Dropout, GlobalAverag
 from keras.models import Model, load_model
 from keras.regularizers import l2
 
-# import complexnn
-from .complexnn import ComplexDense, ComplexConv1D, utils
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
 
-from .models_adsb import Modrelu
 
-def set_keras_backend(backend):
-	if K.backend() != backend:
-		os.environ['KERAS_BACKEND'] = backend
-		reload(K)
-		assert K.backend() == backendr
-
-set_keras_backend("theano")
 
 
 def network_20_modrelu_short(data_input, classes_num=10, weight_decay = 1e-4):

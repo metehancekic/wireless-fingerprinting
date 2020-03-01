@@ -20,10 +20,7 @@ from keras.layers import Dense, Input, Activation, Conv1D, Dropout, GlobalAverag
 from keras.models import Model, load_model
 from keras.regularizers import l2
 
-# # import complexnn
-from .complexnn import ComplexDense, ComplexConv1D, utils
-
-from .models_adsb import Modrelu
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
 
 def set_keras_backend(backend):
 	if K.backend() != backend:
