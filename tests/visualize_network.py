@@ -37,12 +37,8 @@ set_keras_backend("theano")
 
 np.set_printoptions(precision=3)
 
-# exp_dir = '/home/rfml/wifi/experiments/exp19'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Av2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Bv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Cv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Dv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test4/converted_4Cv2'
+exp_dir = 'dataset-directory'
+
 
 preprocess_type = 1
 # preprocess_type = 2

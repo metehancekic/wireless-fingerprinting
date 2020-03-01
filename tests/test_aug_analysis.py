@@ -26,10 +26,10 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict as odict
 import copy
 
-from ..simulators import physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel_test, augment_with_cfo_test, get_residual
+from simulators import physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel_test, augment_with_cfo_test, get_residual
 
-from ..cxnn.complexnn import ComplexDense, ComplexConv1D, utils
-from ..cxnn.models_adsb import Modrelu
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils
+from cxnn.models_adsb import Modrelu
 
 
 import keras
@@ -525,7 +525,7 @@ def plot_test_augs(softmax_test_new, softmax_test_augs, label_act, num):
 
 	# fig.suptitle('{:} Test time augmentation '.format(num), fontsize=30, y=0.001)
 	plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-	plt.savefig('/home/rfml/wifi/'+'5daystest_aug_hist_ch_test_aug_avg_sepcific' + str(num)+ '.pdf', format='pdf', dpi=1000, bbox_inches='tight')
+	plt.savefig('5daystest_aug_hist_ch_test_aug_avg_specific' + str(num)+ '.pdf', format='pdf', dpi=1000, bbox_inches='tight')
 
 
 if __name__=='__main__':
@@ -547,7 +547,7 @@ if __name__=='__main__':
 	n_val = 5
 
 
-	with open('/home/rfml/wifi/scripts/config_cfo_channel.json') as config_file:
+	with open('config_cfo_channel.json') as config_file:
 	    config = json.load(config_file, encoding='utf-8')
 
 	experiment_setup = {'equalize_train_before': False,

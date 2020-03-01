@@ -25,10 +25,8 @@ from keras.regularizers import l2
 from keras.engine.topology import Layer
 
 
-# import complexnn
-from ..cxnn.complexnn import ComplexDense, ComplexConv1D, utils
-# from .cxnn.train_network _rotated_after_conv import set_keras_backend, net_address_20, net_preamble_20, net_preamble_20_no_crelu, net_preamble_20_real, RotateComplex, output_of_lambda, relu_manual, net_preamble_20_rotated, RotateComplex, relu_manual, Modrelu, net_preamble_20_modrelu, net_preamble_20_rot16_real, net_preamble_50, net_preamble_100
-from ..cxnn.models_adsb import Modrelu, set_keras_backend
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils
+from cxnn.models_adsb import Modrelu, set_keras_backend
 
 import matplotlib as mpl
 mpl.rc('text', usetex=True)
@@ -65,12 +63,8 @@ model_name = '-100C200x100-ModReLU-100C10x1-ModReLU-Abs-100shared_D-100shared_D-
 # model_name = '-100C40x10-Abs-100shared_C10x1-100shared_D-100shared_D-Avg'
 
 
-exp_dir = '/home/rfml/wifi/experiments/exp19'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Av2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Bv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Cv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Dv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3E'
+exp_dir = 'dataset-directory'
+
 
 preprocess_type = 1
 sample_rate = 200
