@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 from preproc.preproc_wifi import basic_equalize_preamble, offset_compensate_preamble
 from preproc.fading_model  import normalize, add_custom_fading_channel, add_freq_offset
-from cxnn.train_globecom  import train_20, train_200
+from cxnn.train  import train_20, train_200
 from simulators import signal_power_effect, plot_signals, physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel, augment_with_cfo, get_residual
 
 def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_test_day, experiment_setup, n_val=True):

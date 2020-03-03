@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 
 from preproc.preproc_wifi import basic_equalize_preamble, offset_compensate_preamble, get_residuals_preamble
 from preproc.fading_model  import normalize, add_custom_fading_channel, add_freq_offset
-from cxnn.train_globecom  import train_20, train_200
+
 
 # from freq_offset import estimate_freq_offset !!
 

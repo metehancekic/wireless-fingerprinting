@@ -60,7 +60,7 @@ model_name = '-100C200x100-ModReLU-100C10x1-ModReLU-Abs-100shared_D-100shared_D-
 # model_name = '-100C40x10-Abs-100shared_C10x1-100shared_D-100shared_D-Avg'
 
 
-exp_dir = 'dataset-directory'
+exp_dir = os.environ['path_to_data']
 
 
 preprocess_type = 1

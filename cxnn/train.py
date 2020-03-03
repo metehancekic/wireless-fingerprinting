@@ -18,7 +18,7 @@ from keras.models import Model, load_model
 from keras.regularizers import l2
 
 from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
-from cxnn.models_globecom import network_20_modrelu_short, network_20_reim, network_20_reim_2x, network_20_reim_sqrt2x, network_20_mag, network_200_modrelu_short, network_200_reim, network_200_reim_2x, network_200_reim_sqrt2x, network_200_mag, network_200_modrelu_short_shared
+from cxnn.models import network_20_modrelu_short, network_20_reim, network_20_reim_2x, network_20_reim_sqrt2x, network_20_mag, network_200_modrelu_short, network_200_reim, network_200_reim_2x, network_200_reim_sqrt2x, network_200_mag, network_200_modrelu_short_shared
 
 
 def train_20(dict_data, num_aug_test=1, checkpoint_in=None, checkpoint_out=None, architecture='modrelu', epochs=200, n_val=True):
