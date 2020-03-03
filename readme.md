@@ -40,7 +40,9 @@ Since the implementation of complex valued neural networks is done on Keras with
 > Theano                    1.0.3\
 > tqdm                      4.28.1\
 > scikit-learn              0.20.3\
-> scipy                     1.1.0
+> scipy                     1.1.0\
+> resampy					0.2.1\
+> ipdb						0.11 
 
 ## Running the code #
 

@@ -509,7 +509,7 @@ if __name__=='__main__':
 	experiment_setup = {'equalize_train_before': False,
 						'equalize_test_before':  False,
 
-						'add_channel':           False,
+						'add_channel':           True,
 
 						'add_cfo':               False,
 						'remove_cfo':            False,
@@ -517,7 +517,7 @@ if __name__=='__main__':
 						'equalize_train':        False,
 						'equalize_test':         False,
 
-						'augment_channel':       False,
+						'augment_channel':       True,
 
 						'augment_cfo':           False,
 
@@ -546,7 +546,7 @@ if __name__=='__main__':
 	num_experiments = 5
 	for exp_i in range(num_experiments):
 		# days_multi = [1,2,3,4,5,6,7,8,9,10,15,20]
-		days_multi = [1]
+		days_multi = [20]
 		# max_seed = (max(days_multi)+1) * 20
 		max_seed = 21*20
 		seed_test = exp_i * max_seed + 60
