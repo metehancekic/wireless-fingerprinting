@@ -44,7 +44,9 @@ Since the implementation of complex valued neural networks is done on Keras with
 
 ## Running the code #
 
-To train code for 
+create an environment variable which has the path to the dataset, e.g.,
+
+> export path_to_data='<path-to-data>'
 
 
 
