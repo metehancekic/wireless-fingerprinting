@@ -504,8 +504,10 @@ if __name__=='__main__':
 	n_val = 5
 
 
-	with open('/home/rfml/wifi/scripts/config_cfo_channel.json') as config_file:
+	with open(os.environ['path_to_config']) as config_file:
 	    config = json.load(config_file, encoding='utf-8')
+
+	config['exp_dir'] = os.environ['path_to_data']
 
 	experiment_setup = {'equalize_train_before': False,
 						'equalize_test_before':  False,

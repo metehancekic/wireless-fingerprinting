@@ -1,8 +1,4 @@
 {
-  "_comment": "===== EXPERIMENT DIRECTORY =====",
-  "_explanation": " Directory to load data from ",
-  "exp_dir": "dataset-directory",
-
   "_comment": "===== DATA CONFIGURATION =====",
   "_explanation": " --- ",
   "sample_duration": 16,

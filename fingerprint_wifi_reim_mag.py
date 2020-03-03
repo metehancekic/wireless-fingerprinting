@@ -7,6 +7,7 @@ Data is read from npz files.
 import numpy as np
 from timeit import default_timer as timer
 import argparse
+import os
 
 from .cxnn.train_network_reim_mag import train
 
@@ -26,16 +27,7 @@ architecture = parser.parse_args().arch
 
 # print(architecture)
 
-exp_dir = '/home/rfml/wifi/experiments/exp19'
-# exp_dir = '/home/rfml/wifi/experiments/exp19_S1'
-# exp_dir = '/home/rfml/wifi/experiments/exp19_S2'
-# exp_dir = '/home/rfml/wifi/experiments/exp100_S1'
-# exp_dir = '/home/rfml/wifi/experiments/exp100_S2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Av2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Bv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Cv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3Dv2'
-# exp_dir = '/home/rfml/wifi/experiments/NSWC_Crane_Experiments/Test3/converted_3E'
+exp_dir = os.environ['path_to_data']
 
 # sample_rate = 20
 sample_rate = 200

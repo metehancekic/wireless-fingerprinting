@@ -44,10 +44,13 @@ Since the implementation of complex valued neural networks is done on Keras with
 
 ## Running the code #
 
-create an environment variable which has the path to the dataset, e.g.,
+Create environment variables named as 'path_to_data' and 'path_to_config' which has the path to the dataset and the configuration file, e.g.,
 
 ```bash
-export path_to_data='\<path-to-data\>'
+export path_to_data='<path-to-data>'
+export path_to_config='<path-to-config>'
 ```
+
+
 
 
