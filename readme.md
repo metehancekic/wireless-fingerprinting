@@ -32,7 +32,7 @@ project
 
 ## Prerequisites #
 
-Since the implementation of complex valued neural networks is done on Keras with backend Theano, the following modules are needed to be installed to be able to run experiments.
+Since the implementation of complex valued neural networks is done on Keras with Theano backend, the following modules are needed to be installed to be able to run experiments.
 
 > python                    2.7.1\
 > numpy                     1.15.4\
@@ -40,7 +40,6 @@ Since the implementation of complex valued neural networks is done on Keras with
 > Keras                     2.2.4\
 > Theano                    1.0.3\
 > tqdm                      4.28.1\
-> scikit-learn              0.20.3\
 > scipy                     1.1.0\
 > resampy                   0.2.1\
 > ipdb                      0.11 
