@@ -53,7 +53,8 @@ export path_to_data='<path-to-data>'
 export path_to_config='<path-to-config>'
 ```
 
-You may change the parameters in config_cfo_channel.json as you wish and run the code afterwards as follows:
+CFO and channel simulation parameters can be set in config_cfo_channel.json. The code can then be run using: 
+
 
 ```bash
 python cfo_channel_training.py
@@ -63,9 +64,6 @@ python fingerprint_wifi_reim_mag.py
 ## Complex-valued CNNs
 
 Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018*, with the addition of ModReLU activation function.
-
-
-
 
 
 
