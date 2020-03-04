@@ -1,6 +1,6 @@
 ### Robust Wireless Fingerprinting: Generalizing Across Space and Time #
 
-This repository consists of codes that simulates different channels, CFO, augmentation techniques, estimation techniques, and different combinations of them. The repository consists of 3 folders; namely, cxnn, preproc, tests and a number of scripts outside of these folders (in the main folder). 
+This repository contains scripts to simulate the effect of channel and CFO variations on wireless fingerprinting using complex-valued CNNs. It includes augmentation techniques, estimation techniques, and combinations of the two. The repository consists of 3 folders; namely, cxnn, preproc, tests and a number of scripts outside of these folders (in the main folder). 
 
 ## Module Structure #
 
@@ -53,15 +53,16 @@ export path_to_data='<path-to-data>'
 export path_to_config='<path-to-config>'
 ```
 
-You may change the parameters in config_cfo_channel.json as you wish and run the code afterwards as follow:
+You may change the parameters in config_cfo_channel.json as you wish and run the code afterwards as follows:
 
 ```bash
 python cfo_channel_training.py
 python fingerprint_wifi_reim_mag.py
 ```
 
+## Complex-valued CNNs
 
-
+Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018*, with the addition of ModReLU activation function.
 
 
 
