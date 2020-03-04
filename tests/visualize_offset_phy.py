@@ -107,8 +107,8 @@ keep_orig_test = False
 # keep_orig_test = True
 '''
 aug_type:
-	0 - usual offset aug
-	1 - same offset for ith example in each class
+    0 - usual offset aug
+    1 - same offset for ith example in each class
 '''
 # aug_type = 0
 aug_type = 1
@@ -165,13 +165,13 @@ print("========================================")
 print("== BUILDING MODEL... ==")
 
 if checkpoint_in is None:
-	raise ValueError('Cannot test without a checkpoint')
+    raise ValueError('Cannot test without a checkpoint')
 
 # checkpoint_in += '-new.h5'
 densenet = load_model(checkpoint_in, 
-					  custom_objects={'ComplexConv1D':complexnn.ComplexConv1D,
-									  'GetAbs': utils.GetAbs,
-									  'Modrelu': Modrelu})
+                      custom_objects={'ComplexConv1D':complexnn.ComplexConv1D,
+                                      'GetAbs': utils.GetAbs,
+                                      'Modrelu': Modrelu})
 
 probs = densenet.predict(x=x_test, batch_size=batch_size, verbose=0)
 label_pred = probs.argmax(axis=1) 
@@ -243,65 +243,65 @@ num_filters = filter_indices.size
 plt.figure(figsize=(10, 6))
 
 for index in range(num_filters):
-	filter_index = filter_indices[index]
-	print('\n\nFilter {}'.format(filter_index))
-	time_length = model.output.shape[1]
+    filter_index = filter_indices[index]
+    print('\n\nFilter {}'.format(filter_index))
+    time_length = model.output.shape[1]
 
 
-	loss = K.mean(model.output[:, filter_index])
+    loss = K.mean(model.output[:, filter_index])
 
-	# compute the gradient of the input picture wrt this loss
-	grads = K.gradients(loss, input_signal)[0]
+    # compute the gradient of the input picture wrt this loss
+    grads = K.gradients(loss, input_signal)[0]
 
-	# normalization trick: we normalize the gradient
-	grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
+    # normalization trick: we normalize the gradient
+    grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
 
-	# this function returns the loss and grads given the input picture
-	iterate = K.function([input_signal], [loss, grads])
+    # this function returns the loss and grads given the input picture
+    iterate = K.function([input_signal], [loss, grads])
 
-	# we start from a gray image with some noise
-	# input_data = np.ones((1, 320)) + 1j*np.ones((1,320))
-	input_data = input_data_init
-	velocity = 0
+    # we start from a gray image with some noise
+    # input_data = np.ones((1, 320)) + 1j*np.ones((1,320))
+    input_data = input_data_init
+    velocity = 0
 
-	# run gradient ascent for 100 steps
-	for i in range(epochs):
-		loss_value, grads_value = iterate([input_data])
-		velocity = momentum*velocity + step*grads_value
-		input_data = input_data + velocity
+    # run gradient ascent for 100 steps
+    for i in range(epochs):
+        loss_value, grads_value = iterate([input_data])
+        velocity = momentum*velocity + step*grads_value
+        input_data = input_data + velocity
 
-		# input_data += grads_value * step
-		input_complex = input_data[0:1, :, 0] + 1j* input_data[0:1, :, 1]
-		input_complex /= np.sqrt(np.mean(input_complex * np.conjugate(input_complex)))
-		input_data = np.concatenate((input_complex.real[..., None], input_complex.imag[..., None]), axis=2)
-		if i%20 ==0:
-			print('Step {}, Loss {}'.format(i, loss_value))
+        # input_data += grads_value * step
+        input_complex = input_data[0:1, :, 0] + 1j* input_data[0:1, :, 1]
+        input_complex /= np.sqrt(np.mean(input_complex * np.conjugate(input_complex)))
+        input_data = np.concatenate((input_complex.real[..., None], input_complex.imag[..., None]), axis=2)
+        if i%20 ==0:
+            print('Step {}, Loss {}'.format(i, loss_value))
 
-	input_complex = input_data[0, :, 0] + 1j* input_data[0, :, 1]
-	# input_complex /= np.sqrt(np.mean(input_complex * np.conjugate(input_complex)))
+    input_complex = input_data[0, :, 0] + 1j* input_data[0, :, 1]
+    # input_complex /= np.sqrt(np.mean(input_complex * np.conjugate(input_complex)))
 
-	# input_complex = input_complex[:100]
-	# input_complex = input_complex[:120]
-	symbols = np.arange(input_complex.size)*1.0
+    # input_complex = input_complex[:100]
+    # input_complex = input_complex[:120]
+    symbols = np.arange(input_complex.size)*1.0
 
-	plt.subplot(num_filters, 2, index*2 + 1)
-	# plt.stem(np.abs(input_complex))
-	plt.plot(symbols, np.abs(input_complex), '-')
-	plt.title('Ground truth')
-	# plt.ylabel('Magnitude')
-	# plt.xlabel('Symbols')
-	# plt.title('Filter {}, Magnitude'.format(filter_index+1))
-	plt.title('Filter {}, Magnitude'.format(index+1))
-	plt.grid(True)
-	plt.subplot(num_filters, 2, index*2 + 2)
-	# plt.plot(np.unwrap(np.angle(input_complex)), '-')
-	# plt.stem(np.angle(input_complex))
-	plt.plot(symbols, np.angle(input_complex), '-')
-	# plt.xlabel('Symbols')
-	# plt.ylabel('Phase')
-	plt.grid(True)
-	# plt.title('Filter {}, Phase'.format(filter_index+1))
-	plt.title('Filter {}, Phase'.format(index+1))
+    plt.subplot(num_filters, 2, index*2 + 1)
+    # plt.stem(np.abs(input_complex))
+    plt.plot(symbols, np.abs(input_complex), '-')
+    plt.title('Ground truth')
+    # plt.ylabel('Magnitude')
+    # plt.xlabel('Symbols')
+    # plt.title('Filter {}, Magnitude'.format(filter_index+1))
+    plt.title('Filter {}, Magnitude'.format(index+1))
+    plt.grid(True)
+    plt.subplot(num_filters, 2, index*2 + 2)
+    # plt.plot(np.unwrap(np.angle(input_complex)), '-')
+    # plt.stem(np.angle(input_complex))
+    plt.plot(symbols, np.angle(input_complex), '-')
+    # plt.xlabel('Symbols')
+    # plt.ylabel('Phase')
+    plt.grid(True)
+    # plt.title('Filter {}, Phase'.format(filter_index+1))
+    plt.title('Filter {}, Phase'.format(index+1))
 plt.subplot(num_filters, 2, num_filters*2-1)
 plt.xlabel('Time in symbols')
 plt.subplot(num_filters, 2, num_filters*2)
