@@ -63,7 +63,7 @@ python fingerprint_wifi_reim_mag.py
 
 ## Complex-valued CNNs
 
-Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018*, with the addition of ModReLU activation function.
+Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MIT license), with the addition of cxnn/complexnn/activations.py which contains the ModReLU activation function.
 
 
 
