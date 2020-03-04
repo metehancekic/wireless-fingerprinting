@@ -8,26 +8,26 @@ This repository consists of codes that simulates different channels, CFO, augmen
 project
 │   README.md
 │   cfo_channel_training.py     Training code for all the experiments
-│	cfo_channel_testing.py     	Testing code from checkpoints
-│	config_cfo_channel.json     All hyper parameters for the experiment
-│	simulators.py   			All simulations (CFO, channel, residuals, etc) as functions
+│   cfo_channel_testing.py      Testing code from checkpoints
+│   config_cfo_channel.json     All hyper parameters for the experiment
+│   simulators.py               All simulations (CFO, channel, residuals, etc) as functions
 │
 └───cxnn
-│   │   models.py 					Neural network architectures
-│   │   train.py 					Training function
-│   │   train_network_reim_mag.py 	Training function for real and complex networks
+│   │   models.py                   Neural network architectures
+│   │   train.py                    Training function
+│   │   train_network_reim_mag.py   Training function for real and complex networks
 │   │ 
 │   └───complexnn
 │       │   complex-valued neural network implemantation codes
 │       │   ...
 │   
 └───preproc   
-│   │  fading_model.py 		Signal processing tools (Fading models, etc)   
-│   │  preproc_wifi			Preprocessing tools	(Equalization, etc)
+│   │  fading_model.py      Signal processing tools (Fading models, etc)   
+│   │  preproc_wifi         Preprocessing tools (Equalization, etc)
 │
 └───tests
-    │   test_aug_analysis.py 		Signal processing tools (Fading models, etc)   
-    │	visualize_offset.py			Preprocessing tools	(Equalization, etc)   
+    │   test_aug_analysis.py        Signal processing tools (Fading models, etc)   
+    │   visualize_offset.py         Preprocessing tools (Equalization, etc)   
 ```
 
 ## Prerequisites #
@@ -42,8 +42,8 @@ Since the implementation of complex valued neural networks is done on Keras with
 > tqdm                      4.28.1\
 > scikit-learn              0.20.3\
 > scipy                     1.1.0\
-> resampy					0.2.1\
-> ipdb						0.11 
+> resampy                   0.2.1\
+> ipdb                      0.11 
 
 ## Running the code #
 After downloading the prerequisites, create environment variables named as 'path_to_data' and 'path_to_config' which have the paths to the dataset and the configuration file, e.g.,
