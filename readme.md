@@ -53,6 +53,15 @@ export path_to_data='<path-to-data>'
 export path_to_config='<path-to-config>'
 ```
 
+You may change the parameters in config_cfo_channel.json as you wish and run the code afterwards as follow:
+
+```bash
+python cfo_channel_training.py
+python fingerprint_wifi_reim_mag.py
+```
+
+
+
 
 
 
