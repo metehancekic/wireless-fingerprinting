@@ -65,6 +65,23 @@ python fingerprint_wifi_reim_mag.py
 
 Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MIT license), with the addition of cxnn/complexnn/activations.py which contains the ModReLU activation function.
 
+## Citation
 
+```
+@article{fingerpinting2020,
+  title={Robust Wireless Fingerprinting: Generalizing Across Space and Time},
+  author={Cekic, Metehan and Gopalakrishnan, Soorya and Madhow, Upamanyu},
+  journal={arXiv preprint arXiv:2002.10791},
+  year={2020}
+}
+```
 
-
+```
+@inproceedings{fingerprinting2019globecom,
+ author = {Gopalakrishnan, Soorya and Cekic, Metehan and Madhow, Upamanyu},
+ booktitle = {IEEE Global Communications Conference (Globecom)},
+ location = {Waikoloa, Hawaii},
+ title = {Robust Wireless Fingerprinting via Complex-Valued Neural Networks},
+ year = {2019}
+}
+```
