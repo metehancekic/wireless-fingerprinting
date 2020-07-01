@@ -18,7 +18,6 @@ import ipdb
 from sklearn.preprocessing import normalize
 
 
-
 def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, progress=True):
 
     signal_indices = range(len(data_dict['data_file']))
@@ -26,7 +25,7 @@ def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, 
         signal_indices = tqdm(signal_indices)
 
     flag = 0
-    
+
     for i in signal_indices:
         signal = data_dict['signal'][i]
         orig_sample_rate = data_dict['capture_sample_rate'][i]
@@ -34,13 +33,13 @@ def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, 
         end_index = math.ceil(sample_duration * orig_sample_rate)
 
         if orig_sample_rate == np.int(200e6):
-            if (preprocess_type==2) or (preprocess_type==3):
+            if (preprocess_type == 2) or (preprocess_type == 3):
                 lowFreq = data_dict['freq_lower_edge'][i]
                 upFreq = data_dict['freq_upper_edge'][i]
                 Fc = data_dict['capture_frequency'][i]
                 signal, flag_i = detect_frame(signal, lowFreq, upFreq, Fc, verbose=False)
                 flag = flag + flag_i
-            if preprocess_type==3:
+            if preprocess_type == 3:
                 signal = frac_eq_preamble(signal)
 
         start_index = np.int(start_index)
@@ -64,9 +63,12 @@ def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, 
                     signal = np.ones([signal_size]) * (1.0 + 1.0*1j)/np.sqrt(2*signal_size)
 
         if (preprocess_type == 1) or (orig_sample_rate != np.int(200e6)):
-            freq_shift = (data_dict['freq_upper_edge'][i] + data_dict['freq_lower_edge'][i])/2 - data_dict['capture_frequency'][i]
-            signal = shift_frequency(signal, freq_shift, orig_sample_rate)     # baseband signal w.r.t. center frequency
-            signal = resample(signal, orig_sample_rate, sample_rate)     # filter and downsample signal
+            freq_shift = (data_dict['freq_upper_edge'][i] +
+                          data_dict['freq_lower_edge'][i])/2 - data_dict['capture_frequency'][i]
+            # baseband signal w.r.t. center frequency
+            signal = shift_frequency(signal, freq_shift, orig_sample_rate)
+            # filter and downsample signal
+            signal = resample(signal, orig_sample_rate, sample_rate)
 
         if (preprocess_type == 2):
             signal = resample(signal, orig_sample_rate, sample_rate)
@@ -76,23 +78,28 @@ def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, 
         # data_dict['freq_upper_edge'][i] = sample_rate/2.
         # data_dict['sample_start'][i] = 0
         # data_dict['sample_count'][i] = len(signal)
-        data_dict['center_frequency'][i] = (data_dict['freq_upper_edge'][i] + data_dict['freq_lower_edge'][i])/2.
+        data_dict['center_frequency'][i] = (
+            data_dict['freq_upper_edge'][i] + data_dict['freq_lower_edge'][i])/2.
         data_dict['sample_rate'][i] = sample_rate
 
-    if (preprocess_type==2) or (preprocess_type==3):
-        print('Successful frame detection on {:.2f}% of signals'.format(100.0-flag*100.0/len(data_dict['data_file'])))
+    if (preprocess_type == 2) or (preprocess_type == 3):
+        print('Successful frame detection on {:.2f}% of signals'.format(
+            100.0-flag*100.0/len(data_dict['data_file'])))
 
     return data_dict
+
 
 def frac_eq_preamble(rx, verbose=False):
 
     # print('Hello!')
 
-    Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
+    Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0,
+                                     1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
     stf_64 = ifft(ifftshift(Stf_64))
-    # stf = stf_64[:16] 
+    # stf = stf_64[:16]
 
-    Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+    Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1,
+                    1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
     ltf = ifft(ifftshift(Ltf))
 
     tx = np.concatenate((stf_64[:-32], stf_64, stf_64, ltf[-32:], ltf, ltf))
@@ -120,6 +127,7 @@ def frac_eq_preamble(rx, verbose=False):
 
     return signal_eq.flatten()
 
+
 def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
 
     # print('Hello--')
@@ -135,9 +143,9 @@ def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
     if N % 2 != 0:
         complex_signal = complex_signal[:-1]
         N -= 1
-    low_ind = np.int((lowFreq-Fc)*(N/Fs) + N/2) 
-    up_ind = np.int((upFreq-Fc)*(N/Fs) + N/2) 
-    lag = np.int(( -Fc + (lowFreq+upFreq)/2 )*(N/Fs) + N/2) - np.int(N/2)
+    low_ind = np.int((lowFreq-Fc)*(N/Fs) + N/2)
+    up_ind = np.int((upFreq-Fc)*(N/Fs) + N/2)
+    lag = np.int((-Fc + (lowFreq+upFreq)/2)*(N/Fs) + N/2) - np.int(N/2)
     X = fftshift(fft(complex_signal))
     X[:low_ind] = 0 + 0j
     X[up_ind:] = 0 + 0j
@@ -148,7 +156,7 @@ def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
     # Coarse frame detection (using STF)
     # ----------------------------------------------------
 
-    guard_band_upsamp = np.int(2e-6*Fs) # 2 usec
+    guard_band_upsamp = np.int(2e-6*Fs)  # 2 usec
     n_win = 1600-160                        # ?
     lag = 160
     search_length_stf_upsamp = min(2*guard_band_upsamp+1, np.int(complex_signal.size))
@@ -156,8 +164,8 @@ def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
     a = np.zeros(search_length_stf_upsamp)+0j
     p = np.zeros(search_length_stf_upsamp)
     for n in range(search_length_stf_upsamp):
-        sig1 = complex_signal[n:n+n_win].reshape(1,-1)
-        sig2 = complex_signal[n+lag:n+n_win+lag].conj().reshape(1,-1)
+        sig1 = complex_signal[n:n+n_win].reshape(1, -1)
+        sig2 = complex_signal[n+lag:n+n_win+lag].conj().reshape(1, -1)
         a[n] = sig1.dot(sig2.T)
         # p[n] = np.sum(np.abs(sig1)**2)
         p[n] = np.sqrt(np.sum(np.abs(sig1)**2)*np.sum(np.abs(sig2)**2))
@@ -175,11 +183,11 @@ def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
         # sig4 = complex_signal[frame_start_autocorr_upsamp+np.int(n_short_upsamp/2)+160:frame_start_autocorr_upsamp+n_short_upsamp].copy()
         # df1_upsamp = 1/160 * np.angle(sig3.dot(sig4.T))
         # complex_signal[frame_start_autocorr_upsamp:] *= np.exp(-1j*np.arange(0,complex_signal.size - frame_start_autocorr_upsamp)*df1_upsamp).flatten()
-        if verbose==True:
+        if verbose == True:
             print('Autocorr prediction = {}'.format(frame_start_autocorr_upsamp))
             # print('Freq offset_upsamp = {:.2f} KHz'.format(df1_upsamp* 2e8 / (2*np.pi*1e3)))
     else:
-        if verbose==True:
+        if verbose == True:
             print('Autocorr detection failed\n Prediction = {}'.format(frame_start_autocorr_upsamp))
         frame_start_autocorr_upsamp = guard_band_upsamp
         # df1_upsamp = 0
@@ -187,10 +195,11 @@ def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
 
     return complex_signal[frame_start_autocorr_upsamp:], flag
 
-def offset_compensate_preamble(preamble_in, fs=200e6, verbose=False, option = 1): 
+
+def offset_compensate_preamble(preamble_in, fs=200e6, verbose=False, option=1):
     """
     Function that strips out the effect of the offset from the preamble. 
-    
+
     df = 1/16 arg(sum_{n=0}^{N_short - 1 - 16} s[n]* s'[n+16] )
     s[n] <---- s[n]* e^(j.n.df)
 
@@ -207,23 +216,20 @@ def offset_compensate_preamble(preamble_in, fs=200e6, verbose=False, option = 1)
 
     """
 
-
-
-
     # if fs!=20e6:
     #   raise NotImplementedError
 
     preamble = preamble_in.copy()
 
-    if fs==200e6:
-        if preamble.size!=3200:
+    if fs == 200e6:
+        if preamble.size != 3200:
             raise Exception('Size of preamble is {}, but it should be 3200.'.format(preamble.size))
 
         n_short = 1600  # Length of short preamble
         n_long = 1600   # Length of long preamble
 
-        L = 160 # length of single short sequence
-        N = 640 # length of single long sequnce
+        L = 160  # length of single short sequence
+        N = 640  # length of single long sequnce
 
         # ----------------------------------------------------
         # Frequency offset correction
@@ -238,23 +244,21 @@ def offset_compensate_preamble(preamble_in, fs=200e6, verbose=False, option = 1)
 
         # Fine estimation
         sig5 = preamble[n_short + 2*L: n_short + 2*L + N].conj().copy()
-        sig6 = preamble[n_short + N+2*L: n_short + n_long].reshape(1,-1).copy()
+        sig6 = preamble[n_short + N+2*L: n_short + n_long].reshape(1, -1).copy()
         df2 = 1./N * np.angle(sig5.dot(sig6.T))
         preamble *= np.exp(-1j*np.arange(0, preamble.size)*df2).flatten()
         freq_offset = np.array([df1, df2])
 
+    elif fs == 20e6:
 
-    elif fs==20e6:
-
-        if preamble.size!=320:
+        if preamble.size != 320:
             raise Exception('Size of preamble is {}, but it should be 320.'.format(preamble.size))
-
 
         n_short = 160  # Length of short preamble
         n_long = 160   # Length of long preamble
 
-        L = 16 # length of single short sequence
-        N = 64 # length of single long sequence
+        L = 16  # length of single short sequence
+        N = 64  # length of single long sequence
 
         # ----------------------------------------------------
         # Frequency offset correction
@@ -267,7 +271,7 @@ def offset_compensate_preamble(preamble_in, fs=200e6, verbose=False, option = 1)
 
         # Fine estimation
         sig5 = preamble[n_short+32:n_short+32+N].conj().copy()
-        sig6 = preamble[n_short+N+32:n_short+n_long].reshape(1,-1).copy()
+        sig6 = preamble[n_short+N+32:n_short+n_long].reshape(1, -1).copy()
         df2 = 1./N * np.angle(sig5.dot(sig6.T))
         preamble *= np.exp(-1j*np.arange(0, preamble.size)*df2).flatten()
         freq_offset = np.array([df1, df2])
@@ -278,6 +282,7 @@ def offset_compensate_preamble(preamble_in, fs=200e6, verbose=False, option = 1)
         return preamble, freq_offset
     else:
         raise NotImplementedError
+
 
 def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method='frequency', verbose=False, label=''):
     """
@@ -299,8 +304,8 @@ def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method
     preamble = preamble_in.copy()
     preamble_orig = preamble_in.copy()
 
-    if fs==200e6:
-        if preamble.size!=3200:
+    if fs == 200e6:
+        if preamble.size != 3200:
             raise Exception('Size of preamble is {}, but it should be 3200.'.format(preamble.size))
 
         n_short = 1600
@@ -308,7 +313,6 @@ def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method
 
         L = 160
         N = 640
-
 
         # ----------------------------------------------------
         # Frequency offset correction
@@ -320,24 +324,29 @@ def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method
 
         # Fine estimation
         sig5 = preamble[n_short + 2*L: n_short + 2*L + N].conj().copy()
-        sig6 = preamble[n_short + N+2*L: n_short + n_long].reshape(1,-1).copy()
+        sig6 = preamble[n_short + N+2*L: n_short + n_long].reshape(1, -1).copy()
         df2 = 1./N * np.angle(sig5.dot(sig6.T))
         preamble *= np.exp(-1j*np.arange(0, preamble.size)*df2).flatten()
         freq_offset = np.array([df1, df2])
 
-        cfo_total = np.multiply(np.exp(1j*np.arange(0, preamble.size)*df1).flatten(), np.exp(1j*np.arange(0, preamble.size)*df2).flatten())
+        cfo_total = np.multiply(np.exp(1j*np.arange(0, preamble.size)*df1).flatten(),
+                                np.exp(1j*np.arange(0, preamble.size)*df2).flatten())
 
         # ------------------------------------------------------------------------
         # LTI channel estimation (with delay spread <= length of cyclic prefix)
         # ------------------------------------------------------------------------
 
-        Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
+        Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0,
+                                         1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
 
-        Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+        Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1,
+                        1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
 
-        Ltf1_rx = fftshift(fft(preamble[n_short+np.int(n_long/5):n_short+np.int(n_long/5 + n_long*2/5)])) 
-        Ltf2_rx = fftshift(fft(preamble[n_short+np.int(n_long/5 + n_long*2/5):n_short+n_long])) 
-        Ltf_mid_rx = fftshift(fft(preamble[n_short + 2*L - np.int(L/2):n_short + 2*L+N - np.int(L/2)]))
+        Ltf1_rx = fftshift(
+            fft(preamble[n_short+np.int(n_long/5):n_short+np.int(n_long/5 + n_long*2/5)]))
+        Ltf2_rx = fftshift(fft(preamble[n_short+np.int(n_long/5 + n_long*2/5):n_short+n_long]))
+        Ltf_mid_rx = fftshift(
+            fft(preamble[n_short + 2*L - np.int(L/2):n_short + 2*L+N - np.int(L/2)]))
 
         Ltf_avg_rx = (Ltf1_rx + Ltf2_rx)/2
 
@@ -345,43 +354,48 @@ def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method
 
         H_hat = np.zeros((N)) + 1j*np.zeros((N))
 
-        
-
         # ipdb.set_trace()
 
-        Ltf_interpolated = np.concatenate((np.zeros(32*9) + 1j* np.zeros(32*9), Ltf, np.zeros(32*9) + 1j* np.zeros(32*9)))
+        Ltf_interpolated = np.concatenate(
+            (np.zeros(32*9) + 1j * np.zeros(32*9), Ltf, np.zeros(32*9) + 1j * np.zeros(32*9)))
 
-        H_hat[ind_all] = Ltf_avg_rx[ind_all]*Ltf # because Ltf is 1's and 0's
+        H_hat[ind_all] = Ltf_avg_rx[ind_all]*Ltf  # because Ltf is 1's and 0's
 
-        h_hat = np.roll(ifft(ifftshift(H_hat)),-N//2)
+        h_hat = np.roll(ifft(ifftshift(H_hat)), -N//2)
         # H_1_hat[ind_all] = Ltf_1_rx[ind_all]*Ltf
         # H_2_hat[ind_all] = Ltf_2_rx[ind_all]*Ltf
 
         # H_hat[ind_all] = Ltf/Ltf_avg_rx[ind_all]
-
 
         # ltf_1_interpolated = ifft(ifftshift(H_1_hat*Ltf_interpolated))
         # ltf_2_interpolated = ifft(ifftshift(H_2_hat*Ltf_interpolated))
         # ltf_total = np.concatenate((ltf_1_interpolated[-N//2:], ltf_1_interpolated, ltf_2_interpolated))
 
         # ltf_interpolated = ifft(ifftshift(H_hat * Ltf_interpolated))
-        
+
         if channel_method == 'time':
             ltf_interpolated = ifft(ifftshift(Ltf_interpolated))
-            ltf_total = np.concatenate((ltf_interpolated[-N//2:], ltf_interpolated, ltf_interpolated))
+            ltf_total = np.concatenate(
+                (ltf_interpolated[-N//2:], ltf_interpolated, ltf_interpolated))
 
-            Stf_64_interpolated = np.concatenate((np.zeros(32*9) + 1j* np.zeros(32*9), Stf_64, np.zeros(32*9) + 1j* np.zeros(32*9)))
+            Stf_64_interpolated = np.concatenate(
+                (np.zeros(32*9) + 1j * np.zeros(32*9), Stf_64, np.zeros(32*9) + 1j * np.zeros(32*9)))
             stf_64_interpolated = ifft(ifftshift(Stf_64_interpolated))
-            stf_total = np.concatenate((stf_64_interpolated[-N//2:], stf_64_interpolated, stf_64_interpolated))
+            stf_total = np.concatenate(
+                (stf_64_interpolated[-N//2:], stf_64_interpolated, stf_64_interpolated))
 
-            preamble_constructed = cfo_total * (np.convolve(np.concatenate((stf_total, ltf_total)), h_hat)[N//2-1:-N//2])/rms(np.convolve(np.concatenate((stf_total, ltf_total)), h_hat)[N//2-1:-N//2])
+            preamble_constructed = cfo_total * (np.convolve(np.concatenate((stf_total, ltf_total)), h_hat)[
+                                                N//2-1:-N//2])/rms(np.convolve(np.concatenate((stf_total, ltf_total)), h_hat)[N//2-1:-N//2])
         elif channel_method == 'frequency':
             ltf_interpolated = ifft(ifftshift(H_hat * Ltf_interpolated))
-            ltf_total = np.concatenate((ltf_interpolated[-N//2:], ltf_interpolated, ltf_interpolated))
+            ltf_total = np.concatenate(
+                (ltf_interpolated[-N//2:], ltf_interpolated, ltf_interpolated))
 
-            Stf_64_interpolated = np.concatenate((np.zeros(32*9) + 1j* np.zeros(32*9), Stf_64, np.zeros(32*9) + 1j* np.zeros(32*9)))
+            Stf_64_interpolated = np.concatenate(
+                (np.zeros(32*9) + 1j * np.zeros(32*9), Stf_64, np.zeros(32*9) + 1j * np.zeros(32*9)))
             stf_64_interpolated = ifft(ifftshift(H_hat * Stf_64_interpolated))
-            stf_total = np.concatenate((stf_64_interpolated[-N//2:], stf_64_interpolated, stf_64_interpolated))
+            stf_total = np.concatenate(
+                (stf_64_interpolated[-N//2:], stf_64_interpolated, stf_64_interpolated))
 
             preamble_constructed = cfo_total * np.concatenate((stf_total, ltf_total))
 
@@ -396,7 +410,6 @@ def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method
             residuals = preamble_orig/(preamble_constructed+0.001)
         elif method == 'subtraction':
             residuals = preamble_orig - preamble_constructed
-
 
         # # ----------------------------------------------------
         # # Preamble equalization
@@ -448,7 +461,8 @@ def get_residuals_preamble(preamble_in, fs, method='subtraction', channel_method
 
         # preamble_eq = np.concatenate((stf_1_eq[:-(N//4)], stf_1_eq, stf_2_eq[:-(N//4)], stf_2_eq, ltf_1_eq[:-(N//2)], ltf_1_eq, ltf_2_eq))
 
-    return residuals, preamble_constructed #, h_hat, H_hat
+    return residuals, preamble_constructed  # , h_hat, H_hat
+
 
 def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
     """
@@ -456,7 +470,7 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
     It does the following:
         1. LTI channel estimation (with delay spread <= length of cyclic prefix)
         2. Remove the channel estimate from the preamble
- 
+
     Inputs:
         preamble  - Preamble containing effects of the channel and Tx nonlinearities
                     (320 samples)
@@ -472,8 +486,8 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
 
     preamble = preamble_in.copy()
 
-    if fs==200e6:
-        if preamble.size!=3200:
+    if fs == 200e6:
+        if preamble.size != 3200:
             raise Exception('Size of preamble is {}, but it should be 3200.'.format(preamble.size))
 
         n_short = 1600
@@ -481,7 +495,6 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
 
         L = 160
         N = 640
-
 
         # ----------------------------------------------------
         # Frequency offset correction
@@ -496,18 +509,21 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         # df2 = 1/N * np.angle(sig5.dot(sig6.T))
         # preamble *= np.exp(-1j*np.arange(0, preamble.size)*df2).flatten()
 
-
         # ------------------------------------------------------------------------
         # LTI channel estimation (with delay spread <= length of cyclic prefix)
         # ------------------------------------------------------------------------
 
-        Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
+        Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0,
+                                         1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
 
-        Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
+        Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1,
+                        1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
 
-        Ltf1_rx = fftshift(fft(preamble[n_short+np.int(n_long/5):n_short+np.int(n_long/5 + n_long*2/5)])) 
-        Ltf2_rx = fftshift(fft(preamble[n_short+np.int(n_long/5 + n_long*2/5):n_short+n_long])) 
-        Ltf_mid_rx = fftshift(fft(preamble[n_short + 2*L - np.int(L/2):n_short + 2*L+N - np.int(L/2)]))
+        Ltf1_rx = fftshift(
+            fft(preamble[n_short+np.int(n_long/5):n_short+np.int(n_long/5 + n_long*2/5)]))
+        Ltf2_rx = fftshift(fft(preamble[n_short+np.int(n_long/5 + n_long*2/5):n_short+n_long]))
+        Ltf_mid_rx = fftshift(
+            fft(preamble[n_short + 2*L - np.int(L/2):n_short + 2*L+N - np.int(L/2)]))
 
         Ltf_avg_rx = (Ltf1_rx + Ltf2_rx)/2
         # Ltf_avg_rx = Ltf1_rx
@@ -535,7 +551,6 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         # # h_hat = np.roll(h_hat, -np.int(L/2))
         # H_hat = fftshift(fft(h_hat))
 
-
         ind_all = np.arange(-32, 32) + (N//2)
 
         H_hat = np.zeros((N)) + 1j*np.zeros((N))
@@ -552,14 +567,13 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             H_hat_coarse = H_hat[ind_all]
             h_hat_coarse = ifft(ifftshift(H_hat_coarse))
 
-
             plt.figure(figsize=[10, 3])
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             plt.stem(freq, np.abs(H_hat_coarse))
             plt.grid(True)
             plt.title('Magnitude')
             plt.xlabel('Frequency bin')
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             # plt.stem(freq, np.unwrap(np.angle(H_hat)))
             plt.stem(freq, np.angle(H_hat_coarse))
             plt.title('Phase')
@@ -569,12 +583,12 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.93])
 
             plt.figure(figsize=[10, 3])
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             plt.stem(np.abs(h_hat_coarse))
             plt.title('Magnitude')
             plt.xlabel('Time (in samples)')
             plt.grid(True)
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             # plt.stem(np.unwrap(np.angle(h_hat)))
             plt.stem(np.angle(h_hat_coarse))
             plt.title('Phase')
@@ -582,7 +596,6 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             plt.grid(True)
             plt.suptitle('Coarse estimation'+label)
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.93])
-
 
             # plt.figure(figsize=[10, 3])
             # plt.subplot(1,2,1)
@@ -614,13 +627,14 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             # plt.suptitle('Frequency domain least squares estimation')
             # plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.9])
 
-            # plt.show()
+            plt.show()
 
         # ----------------------------------------------------
         # Preamble equalization
         # ----------------------------------------------------
         ind_guard = np.concatenate((np.arange(-32, -26), np.arange(27, 32))) + (N//2)
-        ind_null = np.concatenate((np.array([0]), np.arange(-(N//2), -32), np.arange(32, (N//2)) )) + (N//2)
+        ind_null = np.concatenate(
+            (np.array([0]), np.arange(-(N//2), -32), np.arange(32, (N//2)))) + (N//2)
         ind_pilots = np.array([-21, -7, 7, 21]) + (N//2)
 
         mask_data = np.ones(N)
@@ -628,8 +642,8 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         mask_data[list(np.concatenate((ind_guard, ind_null, ind_pilots)))] = 0
         mask_data_pilots[list(np.concatenate((ind_guard, ind_null)))] = 0
         ind_all_all = np.arange(-(N//2), (N//2)) + N//2
-        ind_data = ind_all_all[mask_data==1]
-        ind_data_pilots = ind_all_all[mask_data_pilots==1]
+        ind_data = ind_all_all[mask_data == 1]
+        ind_data_pilots = ind_all_all[mask_data_pilots == 1]
 
         Stf_1_eq = fftshift(fft(preamble[n_short-2*N:n_short-N]))
         Stf_2_eq = fftshift(fft(preamble[n_short-N:n_short]))
@@ -664,26 +678,26 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             Ltf_1_eq_down = Ltf_1_eq[ind_all]
             Ltf_2_eq_down = Ltf_2_eq[ind_all]
 
-            plt.figure(figsize=[13, 4.8])       
+            plt.figure(figsize=[13, 4.8])
             plt.subplot(1, 3, 1)
             plt.scatter(Stf_1_eq_down.real, Stf_1_eq_down.imag)
             plt.title('Equalized STF - 1')
             plt.subplot(1, 3, 2)
             plt.scatter(Stf_2_eq_down.real, Stf_2_eq_down.imag)
-            plt.title('Equalized STF - 2')      
+            plt.title('Equalized STF - 2')
             plt.subplot(1, 3, 3)
             plt.scatter(Stf_64.real, Stf_64.imag)
             plt.title('Actual STF')
             plt.suptitle('Signal constellations')
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.93])
 
-            plt.figure(figsize=[13, 4.8])       
+            plt.figure(figsize=[13, 4.8])
             plt.subplot(1, 3, 1)
             plt.scatter(Ltf_1_eq_down.real, Ltf_1_eq_down.imag)
             plt.title('Equalized LTF - 1')
             plt.subplot(1, 3, 2)
             plt.scatter(Ltf_2_eq_down.real, Ltf_2_eq_down.imag)
-            plt.title('Equalized LTF - 2')  
+            plt.title('Equalized LTF - 2')
             plt.subplot(1, 3, 3)
             plt.scatter(Ltf.real, Ltf.imag)
             plt.title('Actual LTF')
@@ -699,7 +713,11 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         ltf_2_eq = ifft(ifftshift(Ltf_2_eq))
 
         # preamble_eq = np.concatenate((stf_1_eq[:-(N//2)], stf_1_eq, stf_2_eq, ltf_1_eq[:-(N//2)], ltf_1_eq, ltf_2_eq))
-        preamble_eq = np.concatenate((stf_1_eq[:-(N//4)], stf_1_eq, stf_2_eq[:-(N//4)], stf_2_eq, ltf_1_eq[:-(N//2)], ltf_1_eq, ltf_2_eq))
+        preamble_eq = np.concatenate(
+            (stf_1_eq[-(N//4):], stf_1_eq, stf_2_eq[-(N//4):], stf_2_eq, ltf_1_eq[-(N//2):], ltf_1_eq, ltf_2_eq))
+
+        # import pdb
+        # pdb.set_trace()
 
         # shift = freq_offset['shift_coarse']
         # df1 = freq_offset['carrier_coarse']
@@ -718,11 +736,10 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
 
         # return preamble_eq, preamble_eq_offset
 
-    elif fs==20e6:
+    elif fs == 20e6:
 
-        if preamble.size!=320:
+        if preamble.size != 320:
             raise Exception('Size of preamble is {}, but it should be 320.'.format(preamble.size))
-
 
         n_short = 160
         n_long = 160
@@ -740,22 +757,24 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         # df2 = 1/64 * np.angle(sig5.dot(sig6.T))
         # preamble *= np.exp(-1j*np.arange(0, preamble.size)*df2).flatten()
 
-
         # ------------------------------------------------------------------------
         # LTI channel estimation (with delay spread <= length of cyclic prefix)
         # ------------------------------------------------------------------------
 
-        Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
+        Stf_64 = np.sqrt(13/6)*np.array([0, 0, 0, 0, 0, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0,
+                                         1+1j, 0, 0, 0, 0, 0, 0, 0, -1-1j, 0, 0, 0, -1-1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 1+1j, 0, 0, 0, 0, 0, 0, 0])
 
-        Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
-
+        Ltf = np.array([0, 0, 0, 0, 0, 0, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1,
+                        1, 0, 1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 0, 0, 0, 0, 0])
 
         L = 16
         N = 64
 
-        Ltf1_rx = fftshift(fft(preamble[n_short+np.int(n_long/5):n_short+np.int(n_long/5 + n_long*2/5)])) 
-        Ltf2_rx = fftshift(fft(preamble[n_short+np.int(n_long/5 + n_long*2/5):n_short+n_long])) 
-        Ltf_mid_rx = fftshift(fft(preamble[n_short + 2*L - np.int(L/2):n_short + 2*L+N - np.int(L/2)]))
+        Ltf1_rx = fftshift(
+            fft(preamble[n_short+np.int(n_long/5):n_short+np.int(n_long/5 + n_long*2/5)]))
+        Ltf2_rx = fftshift(fft(preamble[n_short+np.int(n_long/5 + n_long*2/5):n_short+n_long]))
+        Ltf_mid_rx = fftshift(
+            fft(preamble[n_short + 2*L - np.int(L/2):n_short + 2*L+N - np.int(L/2)]))
         Ltf_avg_rx = (Ltf1_rx + Ltf2_rx)/2
 
         # Ltf_mid_rx = Ltf_avg_rx
@@ -771,9 +790,10 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         ind_null = np.array([0]) + 32
         mask_data_pilots = np.ones(64)
         mask_data_pilots[list(np.concatenate((ind_guard, ind_null)))] = 0
-        ind_data_pilots = ind_all[mask_data_pilots==1]
+        ind_data_pilots = ind_all[mask_data_pilots == 1]
 
-        h_hat_small, residuals, rank, singular_values = np.linalg.lstsq(A[ind_data_pilots,:], Ltf_mid_rx[ind_data_pilots], rcond=None)
+        h_hat_small, residuals, rank, singular_values = np.linalg.lstsq(
+            A[ind_data_pilots, :], Ltf_mid_rx[ind_data_pilots], rcond=None)
 
         h_hat = np.zeros(N)+0j
         h_hat[:L+1] = h_hat_small
@@ -789,12 +809,12 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             h_hat_coarse = ifft(ifftshift(H_hat_coarse))
 
             plt.figure(figsize=[10, 3])
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             plt.stem(freq, np.abs(H_hat_coarse))
             plt.grid(True)
             plt.title('Magnitude')
             plt.xlabel('Frequency bin')
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             # plt.stem(freq, np.unwrap(np.angle(H_hat)))
             plt.stem(freq, np.angle(H_hat_coarse))
             plt.title('Phase')
@@ -804,12 +824,12 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.93])
 
             plt.figure(figsize=[10, 3])
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             plt.stem(np.abs(h_hat_coarse))
             plt.title('Magnitude')
             plt.xlabel('Time (in samples)')
             plt.grid(True)
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             # plt.stem(np.unwrap(np.angle(h_hat)))
             plt.stem(np.angle(h_hat_coarse))
             plt.title('Phase')
@@ -818,14 +838,13 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             plt.suptitle('Coarse estimation')
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.93])
 
-
             plt.figure(figsize=[10, 3])
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             plt.stem(freq, np.abs(H_hat))
             plt.grid(True)
             plt.title('Magnitude')
             plt.xlabel('Frequency bin')
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             # plt.stem(freq, np.unwrap(np.angle(H_hat)))
             plt.stem(freq, np.angle(H_hat))
             plt.title('Phase')
@@ -835,12 +854,12 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.9])
 
             plt.figure(figsize=[10, 3])
-            plt.subplot(1,2,1)
+            plt.subplot(1, 2, 1)
             plt.stem(np.abs(h_hat))
             plt.title('Magnitude')
             plt.xlabel('Time (in samples)')
             plt.grid(True)
-            plt.subplot(1,2,2)
+            plt.subplot(1, 2, 2)
             # plt.stem(np.unwrap(np.angle(h_hat)))
             plt.stem(np.angle(h_hat))
             plt.title('Phase')
@@ -862,8 +881,8 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         mask_data_pilots = np.ones(64)
         mask_data[list(np.concatenate((ind_guard, ind_null, ind_pilots)))] = 0
         mask_data_pilots[list(np.concatenate((ind_guard, ind_null)))] = 0
-        ind_data = ind_all[mask_data==1]
-        ind_data_pilots = ind_all[mask_data_pilots==1]
+        ind_data = ind_all[mask_data == 1]
+        ind_data_pilots = ind_all[mask_data_pilots == 1]
 
         Stf_1_eq = fftshift(fft(preamble[n_short-2*N:n_short-N]))
         Stf_2_eq = fftshift(fft(preamble[n_short-N:n_short]))
@@ -893,26 +912,26 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
 
         if verbose is True:
 
-            plt.figure(figsize=[13, 4.8])       
+            plt.figure(figsize=[13, 4.8])
             plt.subplot(1, 3, 1)
             plt.scatter(Stf_1_eq.real, Stf_1_eq.imag)
             plt.title('Equalized STF - 1')
             plt.subplot(1, 3, 2)
             plt.scatter(Stf_2_eq.real, Stf_2_eq.imag)
-            plt.title('Equalized STF - 2')      
+            plt.title('Equalized STF - 2')
             plt.subplot(1, 3, 3)
             plt.scatter(Stf_64.real, Stf_64.imag)
             plt.title('Actual STF')
             plt.suptitle('Signal constellations')
             plt.tight_layout(rect=[0.01, 0.03, 0.98, 0.93])
 
-            plt.figure(figsize=[13, 4.8])       
+            plt.figure(figsize=[13, 4.8])
             plt.subplot(1, 3, 1)
             plt.scatter(Ltf_1_eq.real, Ltf_1_eq.imag)
             plt.title('Equalized LTF - 1')
             plt.subplot(1, 3, 2)
             plt.scatter(Ltf_2_eq.real, Ltf_2_eq.imag)
-            plt.title('Equalized LTF - 2')  
+            plt.title('Equalized LTF - 2')
             plt.subplot(1, 3, 3)
             plt.scatter(Ltf.real, Ltf.imag)
             plt.title('Actual LTF')
@@ -925,7 +944,8 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
         ltf_1_eq = ifft(ifftshift(Ltf_1_eq))
         ltf_2_eq = ifft(ifftshift(Ltf_2_eq))
 
-        preamble_eq = np.concatenate((stf_1_eq[:-32], stf_1_eq, stf_2_eq, ltf_1_eq[:-32], ltf_1_eq, ltf_2_eq))
+        preamble_eq = np.concatenate(
+            (stf_1_eq[-32:], stf_1_eq, stf_2_eq, ltf_1_eq[-32:], ltf_1_eq, ltf_2_eq))
 
         # shift = freq_offset['shift_coarse']
         # df1 = freq_offset['carrier_coarse']
@@ -946,9 +966,11 @@ def basic_equalize_preamble(preamble_in, fs, verbose=False, label=''):
 
     return preamble_eq
 
+
 def rms(x):
     # Root mean squared value
     return np.sqrt(np.mean(x * np.conjugate(x)))
+
 
 def shift_frequency(vector, freq_shift, fs):
     # Shift frequency of time-series signal by specified amount
@@ -963,6 +985,7 @@ def shift_frequency(vector, freq_shift, fs):
     modulation = np.exp(-1j * 2 * np.pi * freq_shift * t) / np.sqrt(2)     # frequency shift factor
 
     return vector * modulation     # baseband signal
+
 
 def resample(vector, fs, dfs):
     # Resample signal from original sample rate to desired sample rate
@@ -980,9 +1003,11 @@ def resample(vector, fs, dfs):
     # Downsample from common-Hz to desired-Hz
     return resampy.resample(vector, cfs, dfs, filter='kaiser_best')
 
+
 def lcm(a, b):
     # Least common multiple of a and b
     return a * int(b / fractions.gcd(a, b)) if a and b else 0
+
 
 def get_sliding_window(x, window_size=10, stride=1, fs=200e6, fs_natural=20e6):
     shape_ = x.shape
@@ -990,7 +1015,7 @@ def get_sliding_window(x, window_size=10, stride=1, fs=200e6, fs_natural=20e6):
     window_size_samples = np.int(window_size * (fs/fs_natural))
     stride_samples = np.int(stride * (fs/fs_natural))
 
-    # sliding_window = [None] * ((shape_[1]-100+10)//10) 
+    # sliding_window = [None] * ((shape_[1]-100+10)//10)
 
     for i in tqdm(np.arange(0, shape_[1] - window_size_samples + stride_samples, stride_samples)):
         if i == 0:
@@ -1007,12 +1032,12 @@ def read_wifi(files, base_data_directory, device_map, progress=True):
     if progress is True:
         csv = tqdm(csv)
 
-    data_dict = dict(signal={}, device_key={}, # Complex signal and device label [0, N-1] from device_map
-                   sample_rate={}, capture_sample_rate={}, capture_frequency={}, capture_hw={}, 
-                   center_frequency={}, freq_lower_edge={}, freq_upper_edge={},
-                   reference_number={}, data_file={}, sample_start={}, sample_count={},
-                   device_type={}, device_id={}, device_manufacturer={}
-                   )
+    data_dict = dict(signal={}, device_key={},  # Complex signal and device label [0, N-1] from device_map
+                     sample_rate={}, capture_sample_rate={}, capture_frequency={}, capture_hw={},
+                     center_frequency={}, freq_lower_edge={}, freq_upper_edge={},
+                     reference_number={}, data_file={}, sample_start={}, sample_count={},
+                     device_type={}, device_id={}, device_manufacturer={}
+                     )
 
     signal_index = 0
     for file, signal_list in csv:
@@ -1043,7 +1068,8 @@ def read_wifi(files, base_data_directory, device_map, progress=True):
                 data_dict[key][signal_index] = value
 
             capture_properties = all_signals['capture']
-            signal_properties = get_json_signal(all_signals['annotations'], capture_properties[0], signal_name, type='wifi')
+            signal_properties = get_json_signal(
+                all_signals['annotations'], capture_properties[0], signal_name, type='wifi')
 
             for key, value in signal_properties.items():
                 data_dict[key][signal_index] = value
@@ -1053,7 +1079,8 @@ def read_wifi(files, base_data_directory, device_map, progress=True):
             filename = data_dict['data_file'][signal_index]
             start_sample = data_dict['sample_start'][signal_index]
             sample_count = data_dict['sample_count'][signal_index]
-            data, buffer_start, buffer_end = read_sample(filename, start_sample, sample_count, desired_buffer=0)
+            data, buffer_start, buffer_end = read_sample(
+                filename, start_sample, sample_count, desired_buffer=0)
             data_dict['signal'][signal_index] = data
 
             data_dict['center_frequency'][signal_index] = data_dict['capture_frequency'][signal_index]
@@ -1062,8 +1089,8 @@ def read_wifi(files, base_data_directory, device_map, progress=True):
 
             signal_index = signal_index + 1
 
-
     return data_dict
+
 
 def parse_input_files(input_csv, devices_csv):
     device_list = []  # a list of the devices to be trained/tested with
@@ -1086,6 +1113,7 @@ def parse_input_files(input_csv, devices_csv):
     return {'device_list': device_list,
             'device_map': device_map,
             'csv_objects': csv_objects}
+
 
 def get_json_signal(json_annotations, capture, signal_id, type=None):
     for signal in json_annotations:
@@ -1139,9 +1167,8 @@ def read_sample(filename, start_sample, sample_count, desired_buffer):
 
         # Convert interleaved ints into two planes, real and imaginary
         array = raw.reshape([samples_read, 2])
-        
+
         # convert the array to complex
         array = array[:, 0] + 1j*array[:, 1]
 
         return array, buffer_start, buffer_end
-

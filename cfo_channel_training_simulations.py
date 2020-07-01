@@ -1,5 +1,19 @@
+'''
+export path_to_config="/home/rfml/wifi-rebuttal/wifi-fingerprinting-journal/config_cfo_channel.json"
+export path_to_data="/home/rfml/wifi-rebuttal/wifi-fingerprinting-journal/data"
+'''
+
+import matplotlib as mpl
+import os
+import json
+from tqdm import trange, tqdm
+import argparse
+from timeit import default_timer as timer
+import numpy as np
+
+
 from simulators import signal_power_effect, plot_signals, physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel, augment_with_cfo, get_residual
-from cxnn.train import train_20, train_200
+from cxnn.train import train_20, train_200, train_200_val
 from preproc.fading_model import normalize, add_custom_fading_channel, add_freq_offset
 from preproc.preproc_wifi import basic_equalize_preamble, offset_compensate_preamble
 import matplotlib.pyplot as plt
@@ -15,17 +29,10 @@ Real life channel and CFO experiments are done in this code.
  - CFO Augmentation
 '''
 
-import numpy as np
-from timeit import default_timer as timer
-import argparse
-from tqdm import trange, tqdm
-import json
-import os
-import matplotlib as mpl
-mpl.use('Agg')
+# mpl.use('Agg')
 
 
-def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_test_day, experiment_setup, n_val=True):
+def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_test_day, experiment_setup):
 
     # print(architecture)
 
@@ -49,6 +56,7 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
     # Training configuration
     # -------------------------------------------------
     epochs = config['epochs']
+    # epochs = 1
 
     # -------------------------------------------------
     # Equalization before any preprocessing
@@ -135,25 +143,34 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
     # Loading Data
     # -------------------------------------------------
 
-    data_format = '{:.0f}-pp-{:.0f}-fs-{:.0f}'.format(sample_duration, preprocess_type, sample_rate)
-    outfile = exp_dir + '/sym-' + data_format + '.npz'
+    data_format = '{:.0f}-pp-{:.0f}-fs-{:.0f}-matlab-'.format(
+        sample_duration, preprocess_type, sample_rate)
+    outfile = exp_dir + '/matlab_simulations_evm.npz'
 
     np_dict = np.load(outfile)
     dict_wifi = {}
-    dict_wifi['x_train'] = np_dict['arr_0']
-    dict_wifi['y_train'] = np_dict['arr_1']
-    dict_wifi['x_test'] = np_dict['arr_2']
-    dict_wifi['y_test'] = np_dict['arr_3']
-    dict_wifi['fc_train'] = np_dict['arr_4']
-    dict_wifi['fc_test'] = np_dict['arr_5']
+    # import pdb
+    # pdb.set_trace()
+    dict_wifi['x_train'] = np_dict['arr_0.npy']
+    dict_wifi['y_train'] = np_dict['arr_1.npy']
+    dict_wifi['x_validation'] = np_dict['arr_2.npy']
+    dict_wifi['y_validation'] = np_dict['arr_3.npy']
+    dict_wifi['x_test'] = np_dict['arr_4.npy']
+    dict_wifi['y_test'] = np_dict['arr_5.npy']
+    dict_wifi['fc_train'] = np_dict['arr_6.npy']
+    dict_wifi['fc_validation'] = np_dict['arr_7.npy']
+    dict_wifi['fc_test'] = np_dict['arr_8.npy']
     dict_wifi['num_classes'] = dict_wifi['y_test'].shape[1]
 
     # import pdb
     # pdb.set_trace()
+    # plt.plot(np.abs(dict_wifi["x_train"][0, :, 0]+1j*dict_wifi["x_train"][0, :, 1]))
+    # plt.show()
 
     data_format += '_{}'.format(architecture)
 
     num_train = dict_wifi['x_train'].shape[0]
+    num_validation = dict_wifi['x_validation'].shape[0]
     num_test = dict_wifi['x_test'].shape[0]
     num_classes = dict_wifi['y_train'].shape[1]
 
@@ -162,6 +179,9 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
 
     x_train_orig = dict_wifi['x_train'].copy()
     y_train_orig = dict_wifi['y_train'].copy()
+
+    x_validation_orig = dict_wifi['x_validation'].copy()
+    y_validation_orig = dict_wifi['y_validation'].copy()
 
     x_test_orig = dict_wifi['x_test'].copy()
     y_test_orig = dict_wifi['y_test'].copy()
@@ -192,6 +212,12 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
                                                   data_format=data_format,
                                                   verbosity=verbose_test,
                                                   which_set='x_test')
+
+        dict_wifi, data_format = equalize_channel(dict_wifi=dict_wifi,
+                                                  sampling_rate=sampling_rate,
+                                                  data_format=data_format,
+                                                  verbosity=verbose_test,
+                                                  which_set='x_validation')
 
     # --------------------------------------------------------------------------------------------
     # Physical channel simulation (different days)
@@ -316,7 +342,7 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
     # --------------------------------------------------------------------------------------------
 
     # Checkpoint path
-    exp_dir += "/CFO_channel_experiments"
+    exp_dir += "/CFO_channel_experiments_evm"
     checkpoint = str(exp_dir + '/ckpt-' + data_format)
 
     if augment_channel is False:
@@ -331,12 +357,11 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
                                                      architecture=architecture,
                                                      epochs=epochs)
     elif sample_rate == 200:
-        train_output, model_name, summary = train_200(dict_wifi, checkpoint_in=None,
-                                                      num_aug_test=num_aug_test,
-                                                      checkpoint_out=checkpoint,
-                                                      architecture=architecture,
-                                                      epochs=epochs,
-                                                      n_val=n_val)
+        train_output, model_name, summary = train_200_val(dict_wifi, checkpoint_in=None,
+                                                          num_aug_test=num_aug_test,
+                                                          checkpoint_out=checkpoint,
+                                                          architecture=architecture,
+                                                          epochs=epochs)
 
     else:
         raise NotImplementedError
@@ -496,8 +521,6 @@ if __name__ == '__main__':
                         help="Architecture")
     architecture = parser.parse_args().arch
 
-    n_val = 5
-
     with open(os.environ['path_to_config']) as config_file:
         config = json.load(config_file, encoding='utf-8')
 
@@ -508,19 +531,19 @@ if __name__ == '__main__':
 
                         'add_channel':           False,
 
-                        'add_cfo':               False,
-                        'remove_cfo':            True,
+                        'add_cfo':               True,
+                        'remove_cfo':            False,
 
-                        'equalize_train':        True,
-                        'equalize_test':         True,
+                        'equalize_train':        False,
+                        'equalize_test':         False,
 
-                        'augment_channel':       True,
+                        'augment_channel':       False,
 
-                        'augment_cfo':           False,
+                        'augment_cfo':           True,
 
                         'obtain_residuals':      False}
 
-    log_name = ''
+    log_name = '_'
     if experiment_setup['equalize_train_before']:
         log_name += 'eq_'
     if experiment_setup['add_channel']:
@@ -542,8 +565,9 @@ if __name__ == '__main__':
 
     num_experiments = 5
     for exp_i in range(num_experiments):
-        # days_multi = [1,2,3,4,5,6,7,8,9,10,15,20]
-        days_multi = [20]
+        # days_multi = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20]
+        days_multi = [1, 20]
+        # days_multi = [1]
         # max_seed = (max(days_multi)+1) * 20
         max_seed = 21*20
         seed_test = exp_i * max_seed + 60
@@ -553,14 +577,14 @@ if __name__ == '__main__':
         for i in range(len(seeds_train_multi)):
             assert seed_test not in seeds_train_multi[i]
 
-        with open(config['exp_dir'] + "/CFO_channel_experiments/" + log_name + '.txt', 'a+') as f:
+        with open(config['exp_dir'] + "/CFO_channel_experiments_evm/" + log_name + '.txt', 'a+') as f:
             f.write(json.dumps(config))
 
         for indexx, day_count in enumerate(days_multi):
-            train_output = multiple_day_fingerprint(architecture, config, num_days=day_count, seed_days=seeds_train_multi[indexx], seed_test_day=seed_test, experiment_setup=experiment_setup,
-                                                    n_val=n_val)
+            train_output = multiple_day_fingerprint(
+                architecture, config, num_days=day_count, seed_days=seeds_train_multi[indexx], seed_test_day=seed_test, experiment_setup=experiment_setup)
 
-            with open(config['exp_dir'] + "/CFO_channel_experiments/" + log_name + '.txt', 'a+') as f:
+            with open(config['exp_dir'] + "/CFO_channel_experiments_evm/" + log_name + '.txt', 'a+') as f:
 
                 f.write('Number of training days: {:}\n'.format(day_count))
                 if experiment_setup['obtain_residuals']:
