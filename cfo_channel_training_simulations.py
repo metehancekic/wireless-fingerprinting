@@ -10,10 +10,11 @@ from tqdm import trange, tqdm
 import argparse
 from timeit import default_timer as timer
 import numpy as np
+import os
 
 
 from simulators import signal_power_effect, plot_signals, physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel, augment_with_cfo, get_residual
-from cxnn.train import train_20, train_200, train_200_val
+from cxnn.train import train_20, train_200
 from preproc.fading_model import normalize, add_custom_fading_channel, add_freq_offset
 from preproc.preproc_wifi import basic_equalize_preamble, offset_compensate_preamble
 import matplotlib.pyplot as plt
@@ -357,11 +358,11 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
                                                      architecture=architecture,
                                                      epochs=epochs)
     elif sample_rate == 200:
-        train_output, model_name, summary = train_200_val(dict_wifi, checkpoint_in=None,
-                                                          num_aug_test=num_aug_test,
-                                                          checkpoint_out=checkpoint,
-                                                          architecture=architecture,
-                                                          epochs=epochs)
+        train_output, model_name, summary = train_200(dict_wifi, checkpoint_in=None,
+                                                      num_aug_test=num_aug_test,
+                                                      checkpoint_out=checkpoint,
+                                                      architecture=architecture,
+                                                      epochs=epochs)
 
     else:
         raise NotImplementedError
@@ -531,7 +532,7 @@ if __name__ == '__main__':
 
                         'add_channel':           False,
 
-                        'add_cfo':               True,
+                        'add_cfo':               False,
                         'remove_cfo':            False,
 
                         'equalize_train':        False,
@@ -539,7 +540,7 @@ if __name__ == '__main__':
 
                         'augment_channel':       False,
 
-                        'augment_cfo':           True,
+                        'augment_cfo':           False,
 
                         'obtain_residuals':      False}
 
@@ -577,7 +578,7 @@ if __name__ == '__main__':
         for i in range(len(seeds_train_multi)):
             assert seed_test not in seeds_train_multi[i]
 
-        with open(config['exp_dir'] + "/CFO_channel_experiments_evm/" + log_name + '.txt', 'a+') as f:
+        with open(config['exp_dir'] + "/CFO_channel_experiments/" + log_name + '.txt', 'a+') as f:
             f.write(json.dumps(config))
 
         for indexx, day_count in enumerate(days_multi):

@@ -11,11 +11,6 @@
 #export CUDA_VISIBLE_DEVICES="1"
 
 
-COMMAND="export path_to_config=/home/rfml/wifi-rebuttal/wifi-fingerprinting-journal/configs_test.json"
-eval $COMMAND
-
-COMMAND="export path_to_data=/home/rfml/wifi-rebuttal/wifi-fingerprinting-journal/data"
-eval $COMMAND
 
 COMMAND="python cfo_channel_testing_simulations.py"  
 echo $COMMAND

@@ -1,6 +1,7 @@
 {
   "_comment": "===== DATA CONFIGURATION =====",
   "_explanation": " --- ",
+  "exp_dir": "./",
   "sample_duration": 16,
   "preprocess_type": 1,
   "sample_rate": 200,
