@@ -45,18 +45,14 @@ Since the implementation of complex valued neural networks is done on Keras with
 > ipdb                      0.11 
 
 ## Running the code #
-After downloading the prerequisites, create environment variables named as 'path_to_data' and 'path_to_config' which have the paths to the dataset and the configuration file, e.g.,
 
-```bash
-export path_to_data='<path-to-data>'
-export path_to_config='<path-to-config>'
-```
 
-CFO and channel simulation parameters can be set in config_cfo_channel.json. The code can then be run using: 
+CFO and channel simulation parameters can be set in configs_train.json and configs_test.json for training and testing codes respectively. The code can then be run using: 
 
 
 ```bash
-python cfo_channel_training.py
+python cfo_channel_training_simulations.py
+python cfo_channel_testing_simulations.py
 python fingerprint_wifi_reim_mag.py
 ```
 

@@ -47,7 +47,6 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     # Data configuration
     # -------------------------------------------------
 
-    exp_dir = config['exp_dir']
     sample_duration = config['sample_duration']
     preprocess_type = config['preprocess_type']
     sample_rate = config['sample_rate']
@@ -148,7 +147,7 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
 
     data_format = '{:.0f}-pp-{:.0f}-fs-{:.0f}-matlab-'.format(
         sample_duration, preprocess_type, sample_rate)
-    outfile = exp_dir + '/matlab_simulations_evm.npz'
+    outfile = './data/simulations.npz'
 
     np_dict = np.load(outfile)
     dict_wifi = {}
@@ -270,8 +269,7 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     print(data_format)
 
     # Checkpoint path
-    exp_dir += "/CFO_channel_experiments_evm"
-    checkpoint = str(exp_dir + '/ckpt-' + data_format)
+    checkpoint = str('./checkpoints/' + data_format)
 
     # if augment_channel is False:
     #     num_aug_test = 0
@@ -495,17 +493,15 @@ if __name__ == '__main__':
 
     n_val = 5
 
-    with open(os.environ['path_to_config']) as config_file:
+    with open("configs_test.json") as config_file:
         config = json.load(config_file, encoding='utf-8')
-
-    config['exp_dir'] = os.environ['path_to_data']
 
     experiment_setup = {'equalize_train_before': False,
                         'equalize_test_before':  False,
 
-                        'add_channel':           True,
+                        'add_channel':           False,
 
-                        'add_cfo':               True,
+                        'add_cfo':               False,
                         'remove_cfo':            False,
 
                         'equalize_train':        False,
@@ -516,8 +512,8 @@ if __name__ == '__main__':
 
                         'obtain_residuals':      False}
 
-    testing_setup = {'augment_test_channel':     True,
-                     'augment_test_cfo':         True,
+    testing_setup = {'augment_test_channel':     False,
+                     'augment_test_cfo':         False,
                      'remove_test_cfo':          False,
                      'equalize_test':            False}
 
@@ -571,14 +567,16 @@ if __name__ == '__main__':
             config["num_aug_train_cfo"] = ind_train
             config["num_aug_train"] = ind_train
 
-            with open(config['exp_dir'] + "/CFO_channel_experiments_evm/" + log_name + '.txt', 'a+') as f:
+            if not os.path.exists("./logs/"):
+                os.mkdir("./logs/")
+            with open("./logs/" + log_name + '.txt', 'a+') as f:
                 f.write(json.dumps(config))
 
             for indexx, day_count in enumerate(days_multi):
                 test_output, total_aug_test = test_experiments(architecture, config, num_days=day_count, seed_days=seeds_train_multi[indexx], seed_test_day=seed_test, experiment_setup=experiment_setup,
                                                                testing_setup=testing_setup)
 
-                with open(config['exp_dir'] + "/CFO_channel_experiments_evm/" + log_name + '.txt', 'a+') as f:
+                with open("./logs/" + log_name + '.txt', 'a+') as f:
 
                     f.write('Number of training days: {:}\n'.format(day_count))
                     if experiment_setup['augment_cfo']:

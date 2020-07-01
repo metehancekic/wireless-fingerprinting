@@ -48,7 +48,6 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
     # Data configuration
     # -------------------------------------------------
 
-    exp_dir = config['exp_dir']
     sample_duration = config['sample_duration']
     preprocess_type = config['preprocess_type']
     sample_rate = config['sample_rate']
@@ -351,7 +350,7 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
         num_aug_test = 0
 
     print(checkpoint)
-    print('-----------------------\nExperiment:\n' + exp_dir + '\n-----------------------')
+
     if sample_rate == 20:
         train_output, model_name, summary = train_20(dict_wifi, checkpoint_in=None,
                                                      num_aug_test=num_aug_test,
@@ -367,7 +366,6 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
 
     else:
         raise NotImplementedError
-    print('-----------------------\nExperiment:\n' + exp_dir + '\n-----------------------')
 
     # --------------------------------------------------------------------------------------------
     # Write in log file
