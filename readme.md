@@ -1,15 +1,25 @@
-### Robust Wireless Fingerprinting: Generalizing Across Space and Time #
+# Robust Wireless Fingerprinting: Generalizing Across Space and Time #
 
-This repository contains scripts to simulate the effect of channel and CFO variations on wireless fingerprinting using complex-valued CNNs. It includes augmentation techniques, estimation techniques, and combinations of the two. The repository consists of 3 folders; namely, cxnn, preproc, tests and a number of scripts outside of these folders (in the main folder). 
+
+This repository contains scripts to simulate the effect of channel and CFO variations on wireless fingerprinting using complex-valued CNNs. This repo also has simulation-based dataset based on models of some typical nonlinearities. It includes augmentation techniques, estimation techniques, and combinations of the two. The repository consists of 4 folders; namely, cxnn, preproc, tests, data, and a number of scripts outside of these folders (in the main folder). 
+
+## Simulated Dataset #
+
+We have created a simulation-based WiFi dataset based on models of some typical nonlinearities. We implement two different kinds of circuit-level impairments: I/Q imbalance and power amplifier nonlinearity. Training dataset consists of 200 signals per device for 19 devices (classes). The validation and test sets contain 100 signals per device. Overall, the dataset contains 3800 signals for training, 1900 signals for validation and 1900 signals for the test set.
+
+Further details can be found in our paper:
+
+[Paper](https://arxiv.org/pdf/2002.10791.pdf)
 
 ## Module Structure #
 
 ```
 project
 │   README.md
-│   cfo_channel_training.py     Training code for all the experiments
-│   cfo_channel_testing.py      Testing code from checkpoints
-│   config_cfo_channel.json     All hyper parameters for the experiment
+│   cfo_channel_training_simulations.py     Training code for all the experiments
+│   cfo_channel_testing_simulations.py      Testing code from checkpoints
+│   configs_train.json          All hyper parameters for training
+│   configs_test.json           All hyper parameters for testing
 │   simulators.py               All simulations (CFO, channel, residuals, etc) as functions
 │
 └───cxnn
@@ -26,8 +36,12 @@ project
 │   │  preproc_wifi         Preprocessing tools (Equalization, etc)
 │
 └───tests
-    │   test_aug_analysis.py        Signal processing tools (Fading models, etc)   
-    │   visualize_offset.py         Preprocessing tools (Equalization, etc)   
+│   │   test_aug_analysis.py        Signal processing tools (Fading models, etc)   
+│   │   visualize_offset.py         Preprocessing tools (Equalization, etc)   
+│
+└───data
+    │   simulations.npz     Simulated WiFi dataset
+    │   
 ```
 
 ## Prerequisites #
@@ -44,10 +58,15 @@ Since the implementation of complex valued neural networks is done on Keras with
 > resampy                   0.2.1\
 > ipdb                      0.11 
 
+CUDA and cuDNN versions:
+
+> CUDA                  	9.0.176\
+> cuDNN                     7.3.1
+
 ## Running the code #
 
 
-CFO and channel simulation parameters can be set in configs_train.json and configs_test.json for training and testing codes respectively. The code can then be run using: 
+CFO and channel simulation parameters can be set in "configs_train.json" and "configs_test.json" for training and testing codes respectively. The code can then be run using: 
 
 
 ```bash
