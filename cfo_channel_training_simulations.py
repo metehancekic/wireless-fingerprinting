@@ -146,7 +146,7 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
 
     data_format = '{:.0f}-pp-{:.0f}-fs-{:.0f}-matlab-'.format(
         sample_duration, preprocess_type, sample_rate)
-    outfile = exp_dir + '/matlab_simulations_evm.npz'
+    outfile = './data/simulations.npz'
 
     np_dict = np.load(outfile)
     dict_wifi = {}
@@ -343,8 +343,9 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
     # --------------------------------------------------------------------------------------------
 
     # Checkpoint path
-    exp_dir += "/CFO_channel_experiments_evm"
-    checkpoint = str(exp_dir + '/ckpt-' + data_format)
+    if not os.path.exists("./checkpoints/"):
+        os.mkdir("./checkpoints/")
+    checkpoint = str('./checkpoints/' + data_format)
 
     if augment_channel is False:
         num_aug_test = 0
@@ -373,7 +374,9 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
     # --------------------------------------------------------------------------------------------
 
     # Write logs
-    with open(exp_dir + '/logs-' + data_format + '.txt', 'a+') as f:
+    if not os.path.exists("./logs/"):
+        os.mkdir("./logs/")
+    with open('./logs/' + data_format + '.txt', 'a+') as f:
         f.write('\n\n-----------------------\n'+str(model_name)+'\n\n')
 
         # f.write('Different day scenario\n')
@@ -522,10 +525,8 @@ if __name__ == '__main__':
                         help="Architecture")
     architecture = parser.parse_args().arch
 
-    with open(os.environ['path_to_config']) as config_file:
+    with open("./configs_train.json") as config_file:
         config = json.load(config_file, encoding='utf-8')
-
-    config['exp_dir'] = os.environ['path_to_data']
 
     experiment_setup = {'equalize_train_before': False,
                         'equalize_test_before':  False,
@@ -578,14 +579,16 @@ if __name__ == '__main__':
         for i in range(len(seeds_train_multi)):
             assert seed_test not in seeds_train_multi[i]
 
-        with open(config['exp_dir'] + "/CFO_channel_experiments/" + log_name + '.txt', 'a+') as f:
+        if not os.path.exists("./logs/"):
+            os.mkdir("./logs/")
+        with open("./logs/" + log_name + '.txt', 'a+') as f:
             f.write(json.dumps(config))
 
         for indexx, day_count in enumerate(days_multi):
             train_output = multiple_day_fingerprint(
                 architecture, config, num_days=day_count, seed_days=seeds_train_multi[indexx], seed_test_day=seed_test, experiment_setup=experiment_setup)
 
-            with open(config['exp_dir'] + "/CFO_channel_experiments_evm/" + log_name + '.txt', 'a+') as f:
+            with open("./logs/" + log_name + '.txt', 'a+') as f:
 
                 f.write('Number of training days: {:}\n'.format(day_count))
                 if experiment_setup['obtain_residuals']:
