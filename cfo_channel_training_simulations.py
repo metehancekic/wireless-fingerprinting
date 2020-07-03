@@ -30,7 +30,7 @@ Real life channel and CFO experiments are done in this code.
  - CFO Augmentation
 '''
 
-# mpl.use('Agg')
+# 
 
 
 def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_test_day, experiment_setup):

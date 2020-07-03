@@ -17,7 +17,7 @@ from tqdm import trange, tqdm
 import json
 import os
 import matplotlib as mpl
-mpl.use('Agg')
+
 import matplotlib.pyplot as plt
 from collections import OrderedDict as odict
 import copy

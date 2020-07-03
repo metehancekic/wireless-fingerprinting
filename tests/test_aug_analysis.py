@@ -1,3 +1,15 @@
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
+from simulators import physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel_test, augment_with_cfo_test, get_residual
+from keras.regularizers import l2
+from keras.models import Model, load_model
+from keras.layers import Dense, Input, Activation, Conv1D, Dropout, GlobalAveragePooling1D, Lambda, Average
+from keras import optimizers, regularizers, losses
+from keras.utils import plot_model
+from keras import backend as K
+import keras
+import copy
+from collections import OrderedDict as odict
+import matplotlib.pyplot as plt
 '''
 Real life channel and CFO experiments are done in this code.
 
@@ -17,63 +29,47 @@ from tqdm import trange, tqdm
 import json
 import os
 import matplotlib as mpl
-mpl.use('Agg')
-mpl.rc('text', usetex = True)
-mpl.rc('text.latex', preamble = r'\usepackage{amsmath}, \usepackage{sfmath}')
-mpl.rc('xtick', labelsize=20) 
+
+mpl.rc('text', usetex=True)
+mpl.rc('text.latex', preamble=r'\usepackage{amsmath}, \usepackage{sfmath}')
+mpl.rc('xtick', labelsize=20)
 mpl.rc('ytick', labelsize=20)
-import matplotlib.pyplot as plt
-from collections import OrderedDict as odict
-import copy
 
-
-import keras
-from keras import backend as K
-from keras.utils import plot_model
-from keras import optimizers, regularizers, losses
-from keras.layers import Dense, Input, Activation, Conv1D, Dropout, GlobalAveragePooling1D, Lambda, Average
-from keras.models import Model, load_model
-from keras.regularizers import l2
-
-from simulators import physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel_test, augment_with_cfo_test, get_residual
-from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
 
 def test_experiments(architecture, config, num_days, seed_days, seed_test_day, experiment_setup, testing_setup):
 
     # print(architecture)
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Analysis
-    #-------------------------------------------------
+    # -------------------------------------------------
 
     plot_signal = False
     check_signal_power_effect = False
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Data configuration
-    #-------------------------------------------------
+    # -------------------------------------------------
 
     exp_dir = config['exp_dir']
     sample_duration = config['sample_duration']
     preprocess_type = config['preprocess_type']
     sample_rate = config['sample_rate']
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Training configuration
-    #-------------------------------------------------
+    # -------------------------------------------------
     epochs = config['epochs']
 
-
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Equalization before any preprocessing
-    #-------------------------------------------------
+    # -------------------------------------------------
     equalize_train_before = experiment_setup['equalize_train_before']
     equalize_test_before = experiment_setup['equalize_test_before']
 
-
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Physical Channel Parameters
-    #-------------------------------------------------
+    # -------------------------------------------------
     add_channel = experiment_setup['add_channel']
 
     phy_method = num_days
@@ -86,9 +82,9 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     snr_train_phy = config['snr_train_phy']
     snr_test_phy = config['snr_test_phy']
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Physical CFO parameters
-    #-------------------------------------------------
+    # -------------------------------------------------
 
     add_cfo = experiment_setup['add_cfo']
     remove_cfo = experiment_setup['remove_cfo']
@@ -96,20 +92,20 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     phy_method_cfo = phy_method  # config["phy_method_cfo"]
     df_phy_train = config['df_phy_train']
     df_phy_test = config['df_phy_test']
-    seed_phy_train_cfo = seed_phy_train # config['seed_phy_train_cfo']
-    seed_phy_test_cfo = seed_phy_test # config['seed_phy_test_cfo']
+    seed_phy_train_cfo = seed_phy_train  # config['seed_phy_train_cfo']
+    seed_phy_test_cfo = seed_phy_test  # config['seed_phy_test_cfo']
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Equalization params
-    #-------------------------------------------------
+    # -------------------------------------------------
     equalize_train = experiment_setup['equalize_train']
     equalize_test = testing_setup['equalize_test']
     verbose_train = False
     verbose_test = False
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Augmentation channel parameters
-    #-------------------------------------------------
+    # -------------------------------------------------
     augment_channel = experiment_setup['augment_channel']
 
     channel_type_aug_train = config['channel_type_aug_train']
@@ -118,7 +114,7 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     num_aug_test = config['num_aug_test']
     aug_type = config['aug_type']
     num_ch_train = config['num_ch_train']
-    num_ch_test =  config['num_ch_test']
+    num_ch_test = config['num_ch_test']
     channel_method = config['channel_method']
     noise_method = config['noise_method']
     delay_seed_aug_train = False
@@ -129,30 +125,30 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     snr_test = config['snr_test']
     beta = config['beta']
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Augmentation CFO parameters
-    #-------------------------------------------------
+    # -------------------------------------------------
     augment_cfo = experiment_setup['augment_cfo']
 
-    df_aug_train = df_phy_train 
+    df_aug_train = df_phy_train
     rand_aug_train = config['rand_aug_train']
     num_aug_train_cfo = config['num_aug_train_cfo']
     keep_orig_train_cfo = config['keep_orig_train_cfo']
     aug_type_cfo = config['aug_type_cfo']
 
     keep_orig_test_cfo = config["keep_orig_test_cfo"]
-    num_aug_test_cfo = config[ "num_aug_test_cfo"]
+    num_aug_test_cfo = config["num_aug_test_cfo"]
     df_aug_test = config["df_aug_test"]
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Residuals
-    #-------------------------------------------------
+    # -------------------------------------------------
 
     obtain_residuals = experiment_setup['obtain_residuals']
 
-    #-------------------------------------------------
+    # -------------------------------------------------
     # Loading Data
-    #-------------------------------------------------
+    # -------------------------------------------------
 
     data_format = '{:.0f}-pp-{:.0f}-fs-{:.0f}'.format(sample_duration, preprocess_type, sample_rate)
     outfile = exp_dir + '/sym-' + data_format + '.npz'
@@ -179,7 +175,6 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     sampling_rate = sample_rate * 1e+6
     fs = sample_rate * 1e+6
 
-
     if equalize_train_before or equalize_test_before:
         print('\nEqualization Before')
         print('\tTrain: {}, Test: {}'.format(equalize_train_before, equalize_test_before))
@@ -187,55 +182,54 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
         data_format = data_format + '-eq'
 
     if equalize_test_before is True:
-        dict_wifi, data_format = equalize_channel(dict_wifi = dict_wifi, 
-                                                  sampling_rate = sampling_rate, 
-                                                  data_format = data_format, 
-                                                  verbosity = verbose_test, 
-                                                  which_set = 'x_test')
+        dict_wifi, data_format = equalize_channel(dict_wifi=dict_wifi,
+                                                  sampling_rate=sampling_rate,
+                                                  data_format=data_format,
+                                                  verbosity=verbose_test,
+                                                  which_set='x_test')
 
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
     # Physical channel simulation (different days)
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
     if add_channel:
-        dict_wifi, data_format = physical_layer_channel(dict_wifi = dict_wifi, 
-                                                        phy_method = phy_method, 
-                                                        channel_type_phy_train = channel_type_phy_train, 
-                                                        channel_type_phy_test = channel_type_phy_test, 
-                                                        channel_method = channel_method, 
-                                                        noise_method = noise_method, 
-                                                        seed_phy_train = seed_phy_train, 
-                                                        seed_phy_test = seed_phy_test, 
-                                                        sampling_rate = sampling_rate, 
-                                                        data_format = data_format)
+        dict_wifi, data_format = physical_layer_channel(dict_wifi=dict_wifi,
+                                                        phy_method=phy_method,
+                                                        channel_type_phy_train=channel_type_phy_train,
+                                                        channel_type_phy_test=channel_type_phy_test,
+                                                        channel_method=channel_method,
+                                                        noise_method=noise_method,
+                                                        seed_phy_train=seed_phy_train,
+                                                        seed_phy_test=seed_phy_test,
+                                                        sampling_rate=sampling_rate,
+                                                        data_format=data_format)
 
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
     # Physical offset simulation (different days)
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
     if add_cfo:
 
-        dict_wifi, data_format = physical_layer_cfo(dict_wifi = dict_wifi,
-                                                    df_phy_train = df_phy_train,
-                                                    df_phy_test = df_phy_test, 
-                                                    seed_phy_train_cfo = seed_phy_train_cfo, 
-                                                    seed_phy_test_cfo = seed_phy_test_cfo, 
-                                                    sampling_rate = sampling_rate, 
-                                                    phy_method_cfo = phy_method_cfo, 
-                                                    data_format = data_format)
+        dict_wifi, data_format = physical_layer_cfo(dict_wifi=dict_wifi,
+                                                    df_phy_train=df_phy_train,
+                                                    df_phy_test=df_phy_test,
+                                                    seed_phy_train_cfo=seed_phy_train_cfo,
+                                                    seed_phy_test_cfo=seed_phy_test_cfo,
+                                                    sampling_rate=sampling_rate,
+                                                    phy_method_cfo=phy_method_cfo,
+                                                    data_format=data_format)
     if remove_cfo:
         data_format = data_format + '[_comp]-'
 
-    #--------------------------------------------------------------------------------------------
-    # Physical offset compensation 
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
+    # Physical offset compensation
+    # --------------------------------------------------------------------------------------------
     if testing_setup['remove_test_cfo']:
-        dict_wifi, _ = cfo_compansator(dict_wifi = dict_wifi, 
-                                       sampling_rate = sampling_rate, 
-                                       data_format = data_format)
-        
+        dict_wifi, _ = cfo_compansator(dict_wifi=dict_wifi,
+                                       sampling_rate=sampling_rate,
+                                       data_format=data_format)
 
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
     # Equalization
-    #--------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------
     if equalize_train or equalize_test:
         print('\nEqualization')
         print('\tTrain: {}, Test: {}'.format(equalize_train, equalize_test))
@@ -243,35 +237,35 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
         data_format = data_format + '-eq'
 
     if equalize_train is True:
-        dict_wifi, data_format = equalize_channel(dict_wifi = dict_wifi, 
-                                                  sampling_rate = sampling_rate, 
-                                                  data_format = data_format, 
-                                                  verbosity = verbose_train, 
-                                                  which_set = 'x_train')
+        dict_wifi, data_format = equalize_channel(dict_wifi=dict_wifi,
+                                                  sampling_rate=sampling_rate,
+                                                  data_format=data_format,
+                                                  verbosity=verbose_train,
+                                                  which_set='x_train')
 
     if equalize_test is True:
-        dict_wifi, data_format = equalize_channel(dict_wifi = dict_wifi, 
-                                                  sampling_rate = sampling_rate, 
-                                                  data_format = data_format, 
-                                                  verbosity = verbose_test, 
-                                                  which_set = 'x_test')
-
+        dict_wifi, data_format = equalize_channel(dict_wifi=dict_wifi,
+                                                  sampling_rate=sampling_rate,
+                                                  data_format=data_format,
+                                                  verbosity=verbose_test,
+                                                  which_set='x_test')
 
     if augment_channel:
-        data_format = data_format + '[aug-{}-art-{}-ty-{}-nch-{}-snr-{:.0f}]-'.format(num_aug_train, channel_type_aug_train, aug_type, num_ch_train, snr_train)
+        data_format = data_format + '[aug-{}-art-{}-ty-{}-nch-{}-snr-{:.0f}]-'.format(
+            num_aug_train, channel_type_aug_train, aug_type, num_ch_train, snr_train)
 
     if augment_cfo:
-        data_format = data_format + '[augcfo-{}-df-{}-rand-{}-ty-{}-{}-t-]-'.format(num_aug_train_cfo, df_aug_train*1e6, rand_aug_train, aug_type_cfo, keep_orig_train_cfo)
-
+        data_format = data_format + '[augcfo-{}-df-{}-rand-{}-ty-{}-{}-t-]-'.format(
+            num_aug_train_cfo, df_aug_train*1e6, rand_aug_train, aug_type_cfo, keep_orig_train_cfo)
 
     if obtain_residuals is True:
         print('Residuals are being obtained.')
 
-        dict_wifi, data_format = get_residual(dict_wifi = dict_wifi, 
-                                              sampling_rate = sampling_rate, 
-                                              data_format = data_format, 
-                                              verbosity = verbose_test, 
-                                              which_set = 'x_test')
+        dict_wifi, data_format = get_residual(dict_wifi=dict_wifi,
+                                              sampling_rate=sampling_rate,
+                                              data_format=data_format,
+                                              verbosity=verbose_test,
+                                              which_set='x_test')
 
     print(data_format)
 
@@ -290,35 +284,35 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
 
         seed_aug = np.max(seed_phy_train) + seed_phy_test + num_classes + 1
 
-        dict_wifi, data_format = augment_with_channel_test(dict_wifi = dict_wifi, 
-                                                          aug_type = aug_type, 
-                                                          channel_method = channel_method, 
-                                                          num_aug_train = num_aug_train, 
-                                                          num_aug_test = num_aug_test, 
-                                                          keep_orig_train = keep_orig_train, 
-                                                          keep_orig_test = keep_orig_test, 
-                                                          num_ch_train = num_ch_train, 
-                                                          num_ch_test = num_ch_test, 
-                                                          channel_type_aug_train = channel_type_aug_train, 
-                                                          channel_type_aug_test = channel_type_aug_test, 
-                                                          delay_seed_aug_test = delay_seed_aug_test, 
-                                                          snr_test = snr_test, 
-                                                          noise_method = noise_method, 
-                                                          seed_aug = seed_aug, 
-                                                          sampling_rate = sampling_rate,
-                                                          data_format = data_format)
+        dict_wifi, data_format = augment_with_channel_test(dict_wifi=dict_wifi,
+                                                           aug_type=aug_type,
+                                                           channel_method=channel_method,
+                                                           num_aug_train=num_aug_train,
+                                                           num_aug_test=num_aug_test,
+                                                           keep_orig_train=keep_orig_train,
+                                                           keep_orig_test=keep_orig_test,
+                                                           num_ch_train=num_ch_train,
+                                                           num_ch_test=num_ch_test,
+                                                           channel_type_aug_train=channel_type_aug_train,
+                                                           channel_type_aug_test=channel_type_aug_test,
+                                                           delay_seed_aug_test=delay_seed_aug_test,
+                                                           snr_test=snr_test,
+                                                           noise_method=noise_method,
+                                                           seed_aug=seed_aug,
+                                                           sampling_rate=sampling_rate,
+                                                           data_format=data_format)
 
     if testing_setup['augment_test_cfo']:
-        
-        dict_wifi = augment_with_cfo_test(dict_wifi = dict_wifi,
-                                          aug_type_cfo = aug_type_cfo,
-                                          df_aug_test = df_aug_test,
-                                          num_aug_test_cfo = num_aug_test_cfo, 
-                                          keep_orig_test_cfo = keep_orig_test_cfo, 
-                                          rand_aug_test = False, 
-                                          sampling_rate = sampling_rate)
 
-    print("========================================") 
+        dict_wifi = augment_with_cfo_test(dict_wifi=dict_wifi,
+                                          aug_type_cfo=aug_type_cfo,
+                                          df_aug_test=df_aug_test,
+                                          num_aug_test_cfo=num_aug_test_cfo,
+                                          keep_orig_test_cfo=keep_orig_test_cfo,
+                                          rand_aug_test=False,
+                                          sampling_rate=sampling_rate)
+
+    print("========================================")
     print("== BUILDING MODEL... ==")
 
     checkpoint_in = checkpoint
@@ -330,8 +324,8 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
         # densenet = Model(data_input, output)
 
     checkpoint_in = checkpoint_in + '.h5'
-    densenet = load_model(checkpoint_in, 
-                          custom_objects={'ComplexConv1D':ComplexConv1D,
+    densenet = load_model(checkpoint_in,
+                          custom_objects={'ComplexConv1D': ComplexConv1D,
                                           'GetAbs': utils.GetAbs,
                                           'Modrelu': Modrelu})
 
@@ -340,20 +334,20 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     num_test_aug = dict_wifi['x_test'].shape[0]
 
     # probs = densenet.predict(x=x_test, batch_size=batch_size, verbose=0)
-    # label_pred = probs.argmax(axis=1) 
-    # label_act = y_test.argmax(axis=1) 
-    # ind_correct = np.where(label_pred==label_act)[0] 
-    # ind_wrong = np.where(label_pred!=label_act)[0] 
+    # label_pred = probs.argmax(axis=1)
+    # label_act = y_test.argmax(axis=1)
+    # ind_correct = np.where(label_pred==label_act)[0]
+    # ind_wrong = np.where(label_pred!=label_act)[0]
     # assert (num_test == ind_wrong.size + ind_correct.size), 'Major calculation mistake!'
     # test_acc = 100.*ind_correct.size / num_test
 
     # acc_class = np.zeros([num_classes])
     # for class_idx in range(num_classes):
     #   idx_inclass = np.where(label_act==class_idx)[0]
-    #   ind_correct = np.where(label_pred[idx_inclass]==label_act[idx_inclass])[0] 
+    #   ind_correct = np.where(label_pred[idx_inclass]==label_act[idx_inclass])[0]
     #   acc_class[class_idx] = 100*ind_correct.size / idx_inclass.size
 
-    # print("\n========================================") 
+    # print("\n========================================")
     # print('Test accuracy: {:.2f}%'.format(test_acc))
 
     # # print(densenet.summary())
@@ -373,16 +367,11 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
 
     # x_test_classes = np.array(x_test_classes)
 
-
     # layer_name = densenet.layers[-1].name
     # print(layer_name)
     # model_2 = Model(inputs=densenet.input,
     #                 outputs=densenet.get_layer(layer_name).input)
     # weight, bias = densenet.get_layer(layer_name).get_weights()
-
-
-
-
 
     # logits_test = model_2.predict(x=x_test, batch_size=batch_size, verbose=0)
     # logits_test = logits_test.dot(weight) + bias
@@ -390,27 +379,25 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
     output_dict = odict(acc=odict(), comp=odict(), loss=odict())
 
     if num_test_aug != num_test:
-        
+
         num_test_per_aug = num_test_aug // num_test
 
         embeddings = densenet.layers[-2].output
 
         model2 = Model(densenet.input, embeddings)
 
-
         logits_test = model2.predict(x=dict_wifi['x_test'],
                                      batch_size=batch_size,
-                                     verbose=0)     
+                                     verbose=0)
 
         softmax_test = densenet.predict(x=dict_wifi['x_test'],
-                                     batch_size=batch_size,
-                                     verbose=0) 
+                                        batch_size=batch_size,
+                                        verbose=0)
 
         layer_name = densenet.layers[-1].name
         weight, bias = densenet.get_layer(layer_name).get_weights()
 
         logits_test = logits_test.dot(weight) + bias
-
 
         logits_test_new = np.zeros((num_test, num_classes))
         softmax_test_new = np.zeros((num_test, num_classes))
@@ -423,18 +410,17 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
             softmax_test_augs[i] = softmax_test[i*num_test:(i+1)*num_test]
         # Adding LLRs for num_channel_aug_test test augmentations
         label_pred_llr = logits_test_new.argmax(axis=1)
-        label_act = dict_wifi['y_test'][:num_test].argmax(axis=1) 
-        ind_correct = np.where(label_pred_llr==label_act)[0] 
-        ind_wrong = np.where(label_pred_llr!=label_act)[0] 
+        label_act = dict_wifi['y_test'][:num_test].argmax(axis=1)
+        ind_correct = np.where(label_pred_llr == label_act)[0]
+        ind_wrong = np.where(label_pred_llr != label_act)[0]
         assert (num_test == ind_wrong.size + ind_correct.size), 'Major calculation mistake!'
         test_acc_llr = 100.*ind_correct.size / num_test
 
-
         # Adding LLRs for num_channel_aug_test test augmentations
         label_pred_soft = softmax_test_new.argmax(axis=1)
-        label_act = dict_wifi['y_test'][:num_test].argmax(axis=1) 
-        ind_correct = np.where(label_pred_soft==label_act)[0] 
-        ind_wrong = np.where(label_pred_soft!=label_act)[0] 
+        label_act = dict_wifi['y_test'][:num_test].argmax(axis=1)
+        ind_correct = np.where(label_pred_soft == label_act)[0]
+        ind_wrong = np.where(label_pred_soft != label_act)[0]
         assert (num_test == ind_wrong.size + ind_correct.size), 'Major calculation mistake!'
         test_acc_soft = 100.*ind_correct.size / num_test
 
@@ -443,8 +429,8 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
                                  batch_size=batch_size,
                                  verbose=0)
         label_pred = probs.argmax(axis=1)
-        ind_correct = np.where(label_pred==label_act)[0] 
-        ind_wrong = np.where(label_pred!=label_act)[0] 
+        ind_correct = np.where(label_pred == label_act)[0]
+        ind_wrong = np.where(label_pred != label_act)[0]
         assert (num_test == ind_wrong.size + ind_correct.size), 'Major calculation mistake!'
         test_acc = 100.*ind_correct.size / num_test
 
@@ -453,19 +439,17 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
                                  batch_size=batch_size,
                                  verbose=0)
         label_pred = probs.argmax(axis=1)
-        label_act = y_test_orig.argmax(axis=1) 
-        ind_correct = np.where(label_pred==label_act)[0] 
-        ind_wrong = np.where(label_pred!=label_act)[0] 
+        label_act = y_test_orig.argmax(axis=1)
+        ind_correct = np.where(label_pred == label_act)[0]
+        ind_wrong = np.where(label_pred != label_act)[0]
         assert (num_test == ind_wrong.size + ind_correct.size), 'Major calculation mistake!'
         test_acc_no_aug = 100.*ind_correct.size / num_test
 
-        # print("\n========================================") 
+        # print("\n========================================")
         print('Test accuracy (0 aug): {:.2f}%'.format(test_acc_no_aug))
         print('Test accuracy (1 aug): {:.2f}%'.format(test_acc))
         print('Test accuracy ({} aug) llr: {:.2f}%'.format(num_test_per_aug, test_acc_llr))
         print('Test accuracy ({} aug) softmax avg: {:.2f}%'.format(num_test_per_aug, test_acc_soft))
-
-
 
         output_dict['acc']['test_zero_aug'] = test_acc_no_aug
         output_dict['acc']['test_one_aug'] = test_acc
@@ -477,23 +461,24 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
                                  batch_size=batch_size,
                                  verbose=0)
         label_pred = probs.argmax(axis=1)
-        label_act = y_test_orig.argmax(axis=1) 
-        ind_correct = np.where(label_pred==label_act)[0] 
-        ind_wrong = np.where(label_pred!=label_act)[0] 
-        assert (dict_wifi['x_test'].shape[0]== ind_wrong.size + ind_correct.size), 'Major calculation mistake!'
+        label_act = y_test_orig.argmax(axis=1)
+        ind_correct = np.where(label_pred == label_act)[0]
+        ind_wrong = np.where(label_pred != label_act)[0]
+        assert (dict_wifi['x_test'].shape[0] == ind_wrong.size +
+                ind_correct.size), 'Major calculation mistake!'
         test_acc_no_aug = 100.*ind_correct.size / dict_wifi['x_test'].shape[0]
 
-        # print("\n========================================") 
+        # print("\n========================================")
         print('Test accuracy (no aug): {:.2f}%'.format(test_acc_no_aug))
         output_dict['acc']['test'] = test_acc_no_aug
 
-        softmax_test_new = probs 
-        softmax_test_augs = probs.reshape(1,-1,num_classes)
+        softmax_test_new = probs
+        softmax_test_augs = probs.reshape(1, -1, num_classes)
 
     return output_dict, num_test_aug // num_test, softmax_test_new, softmax_test_augs, label_act
 
-def plot_test_augs(softmax_test_new, softmax_test_augs, label_act, num):
 
+def plot_test_augs(softmax_test_new, softmax_test_augs, label_act, num):
     '''
     softmax_test_new = (num_test, num_classes)
     softmax_test_augs = (num_test_aug, num_test, num_classes)
@@ -502,35 +487,34 @@ def plot_test_augs(softmax_test_new, softmax_test_augs, label_act, num):
 
     ind_corr = [None]*19
     for n in range(19):
-        ind_corr[n] = np.where(label_act==n)[0]
-
+        ind_corr[n] = np.where(label_act == n)[0]
 
     n_bins = 30
 
     fig, axs = plt.subplots(2, 2, sharey=True, tight_layout=True, figsize=(10, 8))
-    
 
     # We can set the number of bins with the `bins` kwarg
     k = 0
     # [(0,0),(0,6),(0,7),(4,0),(4,4),(4,7), (7,0),(7,16),(7,7)]
-    for i,j in [(4,4),(4,7),(7,16),(7,7)]:
+    for i, j in [(4, 4), (4, 7), (7, 16), (7, 7)]:
 
-            axs[k//2,k%2].hist(np.mean(softmax_test_augs[:,ind_corr[i],j],axis=0).flatten(), bins=n_bins, density=True, range=[0, 1])
-            axs[k//2,k%2].set_title(r'$p(\hat{{y}} = {:} | y = {:})$'.format(j, i), fontsize=28)
+        axs[k//2, k % 2].hist(np.mean(softmax_test_augs[:, ind_corr[i], j],
+                                      axis=0).flatten(), bins=n_bins, density=True, range=[0, 1])
+        axs[k//2, k % 2].set_title(r'$p(\hat{{y}} = {:} | y = {:})$'.format(j, i), fontsize=28)
 
-            k+=1
-
+        k += 1
 
     # fig.suptitle('{:} Test time augmentation '.format(num), fontsize=30, y=0.001)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig('5daystest_aug_hist_ch_test_aug_avg_specific' + str(num)+ '.pdf', format='pdf', dpi=1000, bbox_inches='tight')
+    plt.savefig('5daystest_aug_hist_ch_test_aug_avg_specific' + str(num) +
+                '.pdf', format='pdf', dpi=1000, bbox_inches='tight')
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--arch", type=str, choices=['reim', 
-                                                           'reim2x', 
+    parser.add_argument("-a", "--arch", type=str, choices=['reim',
+                                                           'reim2x',
                                                            'reimsqrt2x',
                                                            'magnitude',
                                                            'phase',
@@ -538,12 +522,11 @@ if __name__=='__main__':
                                                            'im',
                                                            'modrelu',
                                                            'crelu'],
-                                                           default= 'modrelu', 
-                        help="Architecture") 
+                        default='modrelu',
+                        help="Architecture")
     architecture = parser.parse_args().arch
 
     n_val = 5
-
 
     with open(os.environ['path_to_config']) as config_file:
         config = json.load(config_file, encoding='utf-8')
@@ -600,7 +583,6 @@ if __name__=='__main__':
     if testing_setup['equalize_test']:
         log_name += 'eqtest_'
 
-    
     num_experiments = 1
     for exp_i in range(num_experiments):
         days_multi = [5]
@@ -615,38 +597,23 @@ if __name__=='__main__':
 
         seed_test = exp_i * max_seed + 60
         exp_list = [1, 2, 3, 4, 5]
-        seeds_train_multi = [[exp_i * max_seed + s*20 if exp_i * max_seed + s*20<seed_test else exp_i * max_seed + (s+1)*20 for s in range(days)] for days in days_multi]
+        seeds_train_multi = [[exp_i * max_seed + s*20 if exp_i * max_seed + s*20 <
+                              seed_test else exp_i * max_seed + (s+1)*20 for s in range(days)] for days in days_multi]
         for i in range(len(seeds_train_multi)):
             assert seed_test not in seeds_train_multi[i]
 
-        for ind_test in [0,10,50,100]:
+        for ind_test in [0, 10, 50, 100]:
             config["num_aug_train_cfo"] = 10
-            config["num_aug_train"] =  20
+            config["num_aug_train"] = 20
             config["num_aug_test_cfo"] = ind_test
             config["num_aug_test"] = ind_test
 
             for indexx, day_count in enumerate(days_multi):
-                test_output, total_aug_test, softmax_test_new, softmax_test_augs, label_act = test_experiments(architecture, config, num_days = day_count, seed_days = seeds_train_multi[indexx], seed_test_day = seed_test, experiment_setup = experiment_setup,
-                    testing_setup = testing_setup)
+                test_output, total_aug_test, softmax_test_new, softmax_test_augs, label_act = test_experiments(architecture, config, num_days=day_count, seed_days=seeds_train_multi[indexx], seed_test_day=seed_test, experiment_setup=experiment_setup,
+                                                                                                               testing_setup=testing_setup)
 
                 # import ipdb; ipdb.set_trace()
 
                 plot_test_augs(softmax_test_new, softmax_test_augs, label_act, ind_test)
 
-
-
-
-                
-
     # _ = multiple_day_fingerprint(architecture, config, num_days = 2, seed_days = [20, 40], seed_test_day = 60, experiment_setup = experiment_setup, n_val=n_val)
-
-
-
-
-
-
-
-
-
-
-

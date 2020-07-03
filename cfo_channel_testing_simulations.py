@@ -29,7 +29,7 @@ from tqdm import trange, tqdm
 import json
 import os
 import matplotlib as mpl
-mpl.use('Agg')
+
 
 
 def test_experiments(architecture, config, num_days, seed_days, seed_test_day, experiment_setup, testing_setup):

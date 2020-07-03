@@ -14,7 +14,7 @@ from tqdm import trange, tqdm
 import json
 import os
 import matplotlib as mpl
-mpl.use('Agg')
+
 
 
 def real_to_complex(signals):

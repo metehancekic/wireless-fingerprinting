@@ -22,7 +22,7 @@ from tqdm import trange, tqdm
 import json
 import os
 import matplotlib as mpl
-mpl.use('Agg')
+
 
 
 def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_test_day, experiment_setup, n_val=True):
