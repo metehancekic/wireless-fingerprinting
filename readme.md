@@ -47,9 +47,11 @@ project
 Since the implementation of complex valued neural networks is done on Keras with Theano backend, the following modules are needed to be installed to be able to run experiments.
 
 > python                    2.7.1\
-> numpy                     1.15.4\
+> numpy                     \
 > matplotlib                2.2.3\
 > Keras                     2.2.4\
+> scikit-learn              0.20.4\
+> h5py                      2.8.0\
 > Theano                    1.0.3\
 > tqdm                      4.28.1\
 > scipy                     1.1.0\
@@ -63,12 +65,13 @@ CUDA and cuDNN versions:
 
 ## Building the environment and running the code #
 
+This repo can be installed via following command:
+
 ```bash
 git clone https://github.com/metehancekic/wireless-fingerprinting.git
-cd wireless-fingerprinting/
 ```
 
-We strongly recommend to install miniconda and create a virtual environment and run the following commands.
+We strongly recommend to install miniconda, create a virtual environment, and run the following commands. These commands will build the environment which is necessary to run the codes in this repository.
 
 ```bash
 conda create -n cxnn2 python=2.7
@@ -82,9 +85,9 @@ CFO and channel simulation parameters can be set in "configs_train.json" and "co
 
 
 ```bash
-python cfo_channel_training_simulations.py
-python cfo_channel_testing_simulations.py
-python fingerprint_wifi_reim_mag.py
+KERAS_BACKEND=theano python cfo_channel_training_simulations.py
+KERAS_BACKEND=theano python cfo_channel_testing_simulations.py
+KERAS_BACKEND=theano python fingerprint_wifi_reim_mag.py
 ```
 
 ## Complex-valued CNNs
