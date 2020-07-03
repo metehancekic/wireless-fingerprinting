@@ -63,15 +63,20 @@ CUDA and cuDNN versions:
 
 ## Building the environment and running the code #
 
-'''bash
+```bash
 git clone https://github.com/metehancekic/wireless-fingerprinting.git
 cd wireless-fingerprinting/
+```
+
+We strongly recommend to install miniconda and create a virtual environment and run the following commands.
+
+```bash
 conda create -n cxnn2 python=2.7
 conda activate cxnn2
 pip install -r requirements.txt 
 conda install mkl-service
 conda install -c conda-forge resampy
-'''
+```
 
 CFO and channel simulation parameters can be set in "configs_train.json" and "configs_test.json" for training and testing codes respectively. The code can then be run using: 
 
