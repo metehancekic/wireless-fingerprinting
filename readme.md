@@ -5,7 +5,7 @@ This repository contains scripts to simulate the effect of channel and CFO varia
 
 ## Simulated Dataset #
 
-We have created a simulation-based WiFi dataset based on models of some typical nonlinearities. We implement two different kinds of circuit-level impairments: I/Q imbalance and power amplifier nonlinearity. Training dataset consists of 200 signals per device for 19 devices (classes). The validation and test sets contain 100 signals per device. Overall, the dataset contains 3800 signals for training, 1900 signals for validation and 1900 signals for the test set.
+We have created a simulation-based WiFi dataset based on models of some typical nonlinearities. We implement two different kinds of circuit-level impairments: I/Q imbalance and power amplifier nonlinearity. Training dataset consists of 200 signals per device for 19 devices (classes). The validation and test sets contain 100 signals per device. Overall, the dataset contains 3800 signals for training, 1900 signals for validation and 1900 signals for the test set. Data can be downloaded as an npz file from [this Box link](https://ucsb.box.com/s/ddub4zlp2wbckk4l1v1785yw2aluzfru).
 
 Further details can be found in our [paper](https://arxiv.org/pdf/2002.10791.pdf):
 
