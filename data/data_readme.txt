@@ -1,1 +1,3 @@
-The simulation based dataset can be downloaded as an npz file from this Box link: https://ucsb.app.box.com/s/ddub4zlp2wbckk4l1v1785yw2aluzfru
+The simulation based dataset can be downloaded as an npz file from this Box link: https://ucsb.app.box.com/s/ddub4zlp2wbckk4l1v1785yw2aluzfru.
+
+After download, the npz file needs to be copied into this subdirectory (data/).
