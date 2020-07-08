@@ -1,15 +1,3 @@
-from keras.regularizers import l2
-from keras.models import Model, load_model
-from keras.layers import Dense, Input, Activation, Conv1D, Dropout, GlobalAveragePooling1D, Lambda, Average
-from keras import optimizers, regularizers, losses
-from keras.utils import plot_model
-from keras import backend as K
-import keras
-from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
-from simulators import physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel_test, augment_with_cfo_test, get_residual
-import copy
-from collections import OrderedDict as odict
-import matplotlib.pyplot as plt
 '''
 Real life channel and CFO experiments are done in this code.
 
@@ -29,7 +17,21 @@ from tqdm import trange, tqdm
 import json
 import os
 import matplotlib as mpl
+import copy
+from collections import OrderedDict as odict
+import matplotlib.pyplot as plt
 
+from keras.regularizers import l2
+from keras.models import Model, load_model
+from keras.layers import Dense, Input, Activation, Conv1D, Dropout, GlobalAveragePooling1D, Lambda, Average
+from keras import optimizers, regularizers, losses
+from keras.utils import plot_model
+from keras import backend as K
+import keras
+
+from cxnn.complexnn import ComplexDense, ComplexConv1D, utils, Modrelu
+from simulators import physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel_test, augment_with_cfo_test, get_residual
+from experiment_setup import get_arguments
 
 
 def test_experiments(architecture, config, num_days, seed_days, seed_test_day, experiment_setup, testing_setup):
@@ -477,19 +479,9 @@ def test_experiments(architecture, config, num_days, seed_days, seed_test_day, e
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--arch", type=str, choices=['reim',
-                                                           'reim2x',
-                                                           'reimsqrt2x',
-                                                           'magnitude',
-                                                           'phase',
-                                                           're',
-                                                           'im',
-                                                           'modrelu',
-                                                           'crelu'],
-                        default='modrelu',
-                        help="Architecture")
-    architecture = parser.parse_args().arch
+    args = get_arguments()
+
+    architecture = args.architecture
 
     n_val = 5
 
@@ -499,23 +491,23 @@ if __name__ == '__main__':
     experiment_setup = {'equalize_train_before': False,
                         'equalize_test_before':  False,
 
-                        'add_channel':           False,
+                        'add_channel':           args.physical_channel,
 
-                        'add_cfo':               False,
-                        'remove_cfo':            False,
+                        'add_cfo':               args.physical_cfo,
+                        'remove_cfo':            args.compensate_cfo,
 
-                        'equalize_train':        False,
+                        'equalize_train':        args.equalize_train,
 
-                        'augment_channel':       False,
+                        'augment_channel':       args.augment_channel,
 
-                        'augment_cfo':           False,
+                        'augment_cfo':           args.augment_cfo,
 
-                        'obtain_residuals':      False}
+                        'obtain_residuals':      args.obtain_residuals}
 
-    testing_setup = {'augment_test_channel':     False,
-                     'augment_test_cfo':         False,
-                     'remove_test_cfo':          False,
-                     'equalize_test':            False}
+    testing_setup = {'augment_test_channel':     args.augment_channel_test,
+                     'augment_test_cfo':         args.augment_cfo_test,
+                     'remove_test_cfo':          args.compensate_cfo_test,
+                     'equalize_test':            args.equalize_test}
 
     log_name = 'aa_test_'
     if experiment_setup['equalize_train_before']:

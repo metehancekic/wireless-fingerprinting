@@ -11,13 +11,15 @@ import argparse
 from timeit import default_timer as timer
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 
 from simulators import signal_power_effect, plot_signals, physical_layer_channel, physical_layer_cfo, cfo_compansator, equalize_channel, augment_with_channel, augment_with_cfo, get_residual
 from cxnn.train import train_20, train_200
 from preproc.fading_model import normalize, add_custom_fading_channel, add_freq_offset
 from preproc.preproc_wifi import basic_equalize_preamble, offset_compensate_preamble
-import matplotlib.pyplot as plt
+from experiment_setup import get_arguments
+
 '''
 Real life channel and CFO experiments are done in this code.
 
@@ -30,7 +32,7 @@ Real life channel and CFO experiments are done in this code.
  - CFO Augmentation
 '''
 
-# 
+#
 
 
 def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_test_day, experiment_setup):
@@ -509,19 +511,9 @@ def multiple_day_fingerprint(architecture, config, num_days, seed_days, seed_tes
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--arch", type=str, choices=['reim',
-                                                           'reim2x',
-                                                           'reimsqrt2x',
-                                                           'magnitude',
-                                                           'phase',
-                                                           're',
-                                                           'im',
-                                                           'modrelu',
-                                                           'crelu'],
-                        default='modrelu',
-                        help="Architecture")
-    architecture = parser.parse_args().arch
+    args = get_arguments()
+
+    architecture = args.architecture
 
     with open("./configs_train.json") as config_file:
         config = json.load(config_file, encoding='utf-8')
@@ -529,19 +521,19 @@ if __name__ == '__main__':
     experiment_setup = {'equalize_train_before': False,
                         'equalize_test_before':  False,
 
-                        'add_channel':           False,
+                        'add_channel':           args.physical_channel,
 
-                        'add_cfo':               False,
-                        'remove_cfo':            False,
+                        'add_cfo':               args.physical_cfo,
+                        'remove_cfo':            args.compensate_cfo,
 
-                        'equalize_train':        False,
-                        'equalize_test':         False,
+                        'equalize_train':        args.equalize_train,
+                        'equalize_test':         args.equalize_test,
 
-                        'augment_channel':       False,
+                        'augment_channel':       args.augment_channel,
 
-                        'augment_cfo':           False,
+                        'augment_cfo':           args.augment_cfo,
 
-                        'obtain_residuals':      False}
+                        'obtain_residuals':      args.obtain_residuals}
 
     log_name = '_'
     if experiment_setup['equalize_train_before']:
@@ -566,8 +558,8 @@ if __name__ == '__main__':
     num_experiments = 5
     for exp_i in range(num_experiments):
         # days_multi = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20]
-        days_multi = [1, 20]
-        # days_multi = [1]
+        # days_multi = [1, 20]
+        days_multi = [20]
         # max_seed = (max(days_multi)+1) * 20
         max_seed = 21*20
         seed_test = exp_i * max_seed + 60
