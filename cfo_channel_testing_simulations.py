@@ -540,7 +540,7 @@ if __name__ == '__main__':
 
     num_experiments = 5
     for exp_i in range(num_experiments):
-        days_multi = [1, 20]
+        days_multi = [20]
         # days_multi = [10]
         # days_multi = [1]
         # days_multi = [1,5,10,15,20]
