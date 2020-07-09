@@ -19,6 +19,7 @@ project
 │   configs_train.json          All hyper parameters for training
 │   configs_test.json           All hyper parameters for testing
 │   simulators.py               All simulations (CFO, channel, residuals, etc) as functions
+│   experiment_setup.py         Experiment setup (use different day channel, cfo effects or not)
 │
 └───cxnn
 │   │   models.py                   Neural network architectures
@@ -81,13 +82,74 @@ conda install mkl-service
 conda install -c conda-forge resampy
 ```
 
-CFO and channel simulation parameters can be set in "configs_train.json" and "configs_test.json" for training and testing codes respectively. The code can then be run using: 
-
+The code with default parameters (without channel and CFO) can be run using: 
 
 ```bash
 KERAS_BACKEND=theano python cfo_channel_training_simulations.py
 KERAS_BACKEND=theano python cfo_channel_testing_simulations.py
 KERAS_BACKEND=theano python fingerprint_wifi_reim_mag.py
+```
+
+Controlled experiments emulating the effect of frequency drift and channel variations is included via "experiment_setup.py" or can be explicitly called on terminal. All the hyper-parameters for these experiments are in "configs_train.json" and "configs_test.json" for training and testing codes respectively. 
+
+For detailed information about arguments use following code:
+
+```bash
+KERAS_BACKEND=theano python cfo_channel_training_simulations.py --help
+```
+
+```
+usage: cfo_channel_testing_simulations.py [-h]
+                                          [-a {reim,reim2x,reimsqrt2x,magnitude,phase,re,im,modrelu,crelu}]
+                                          [-phy_ch] [-phy_cfo] [-comp_cfo]
+                                          [-eq_tr] [-aug_ch] [-aug_cfo] [-res]
+                                          [-eq_test] [-comp_cfo_test]
+                                          [-aug_ch_test] [-aug_cfo_test]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a {reim,reim2x,reimsqrt2x,magnitude,phase,re,im,modrelu,crelu}, --architecture {reim,reim2x,reimsqrt2x,magnitude,phase,re,im,modrelu,crelu}
+                        Architecture
+
+setup:
+  Setup for experiments
+
+  -phy_ch, --physical_channel
+                        Emulate the effect of channel variations, default =
+                        False
+  -phy_cfo, --physical_cfo
+                        Emulate the effect of frequency variations, default =
+                        False
+  -comp_cfo, --compensate_cfo
+                        Compensate frequency of training set, default = False
+  -eq_tr, --equalize_train
+                        Equalize training set, default = False
+  -aug_ch, --augment_channel
+                        Augment channel for training set, default = False
+  -aug_cfo, --augment_cfo
+                        Augment cfo for training set, default = False
+  -res, --obtain_residuals
+                        Obtain residuals for both train and test set, default
+                        = False
+  -comp_cfo_test, --compensate_cfo_test
+                        Compensate frequency of test set, default = False
+
+test setup:
+  Test Setup for experiments
+
+  -eq_test, --equalize_test
+                        Equalize test set, default = False
+  -aug_ch_test, --augment_channel_test
+                        Augment channel for test set, default = False
+  -aug_cfo_test, --augment_cfo_test
+                        Augment cfo for test set, default = False
+```
+
+Running code with different day scenario (channel, cfo):
+
+```bash
+KERAS_BACKEND=theano python cfo_channel_training_simulations.py --phsical_channel --physical_cfo --augment_channel --augment_cfo
+KERAS_BACKEND=theano python cfo_channel_testing_simulations.py --phsical_channel --physical_cfo --augment_channel --augment_cfo --augment_channel_test --augment_cfo_test
 ```
 
 ## Complex-valued CNNs
