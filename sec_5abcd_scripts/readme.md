@@ -1,4 +1,4 @@
-# Section 5-a,b,c,d Results#
+# Section 5-a,b,c,d Results
 
 Scripts to obtain results on section 5-a,b,c,d. 
 

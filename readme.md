@@ -27,8 +27,11 @@ pip install -r requirements.txt
 conda install mkl-service
 conda install -c conda-forge resampy
 ```
-
 For gpu usage:
+```bash
+conda install -c anaconda pygpu
+```
+With following CUDA and cuDNN versions:
 
 > CUDA                    9.0.176\
 > cuDNN                     7.3.1
@@ -38,7 +41,6 @@ The code with default parameters (without channel and CFO) can be run using:
 ```bash
 KERAS_BACKEND=theano python cfo_channel_training_simulations.py
 KERAS_BACKEND=theano python cfo_channel_testing_simulations.py
-KERAS_BACKEND=theano python fingerprint_wifi_reim_mag.py
 ```
 
 Controlled experiments emulating the effect of frequency drift and channel variations is included via "experiment_setup.py" or can be explicitly called on terminal. All the hyper-parameters for these experiments are in "configs_train.json" and "configs_test.json" for training and testing codes respectively. 
