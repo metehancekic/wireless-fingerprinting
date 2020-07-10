@@ -10,27 +10,6 @@ We have created a simulation-based WiFi dataset based on models of some typical 
 Further details can be found in our paper at section 5e:
 
 
-## Prerequisites #
-
-Since the implementation of complex valued neural networks is done on Keras with Theano backend, the following modules are needed to be installed to be able to run experiments.
-
-> python                    2.7.1\
-> numpy                     \
-> matplotlib                2.2.3\
-> Keras                     2.2.4\
-> scikit-learn              0.20.4\
-> h5py                      2.8.0\
-> Theano                    1.0.3\
-> tqdm                      4.28.1\
-> scipy                     1.1.0\
-> resampy                   0.2.1\
-> ipdb                      0.11 
-
-CUDA and cuDNN versions:
-
-> CUDA                  	9.0.176\
-> cuDNN                     7.3.1
-
 ## Building the environment and running the code #
 
 This repo can be installed via following command:
@@ -39,15 +18,20 @@ This repo can be installed via following command:
 git clone https://github.com/metehancekic/wireless-fingerprinting.git
 ```
 
-We strongly recommend to install miniconda, create a virtual environment, and run the following commands. These commands will build the environment which is necessary to run the codes in this repository.
+Since the implementation of complex valued neural networks is done on Keras with Theano backend, the modules inside the requirements.txt are needed to be installed to be able to run experiments. We strongly recommend to install miniconda, create a virtual environment, and run the following commands. These commands will build the environment which is necessary to run the codes in this repository.
 
 ```bash
-conda create -n cxnn2 python=2.7
-conda activate cxnn2
+conda create -n cxnn python=2.7
+conda activate cxnn
 pip install -r requirements.txt 
 conda install mkl-service
 conda install -c conda-forge resampy
 ```
+
+For gpu usage:
+
+> CUDA                    9.0.176\
+> cuDNN                     7.3.1
 
 The code with default parameters (without channel and CFO) can be run using: 
 
@@ -119,31 +103,6 @@ KERAS_BACKEND=theano python cfo_channel_training_simulations.py --phsical_channe
 KERAS_BACKEND=theano python cfo_channel_testing_simulations.py --phsical_channel --physical_cfo --augment_channel --augment_cfo --augment_channel_test --augment_cfo_test
 ```
 
-## Complex-valued CNNs
-
-Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MIT license), with the addition of cxnn/complexnn/activations.py which contains the ModReLU activation function.
-
-## Citation
-
-```
-@article{fingerpinting2020,
-  title={Robust Wireless Fingerprinting: Generalizing Across Space and Time},
-  author={Cekic, Metehan and Gopalakrishnan, Soorya and Madhow, Upamanyu},
-  journal={arXiv preprint arXiv:2002.10791},
-  year={2020}
-}
-```
-
-```
-@inproceedings{fingerprinting2019globecom,
- author = {Gopalakrishnan, Soorya and Cekic, Metehan and Madhow, Upamanyu},
- booktitle = {IEEE Global Communications Conference (Globecom)},
- location = {Waikoloa, Hawaii},
- title = {Robust Wireless Fingerprinting via Complex-Valued Neural Networks},
- year = {2019}
-}
-```
-
 ## Module Structure #
 
 ```
@@ -177,3 +136,30 @@ project
     │   simulations.npz     Simulated WiFi dataset
     │   
 ```
+
+## Complex-valued CNNs
+
+Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MIT license), with the addition of cxnn/complexnn/activations.py which contains the ModReLU activation function.
+
+## Citation
+
+```
+@article{fingerpinting2020,
+  title={Robust Wireless Fingerprinting: Generalizing Across Space and Time},
+  author={Cekic, Metehan and Gopalakrishnan, Soorya and Madhow, Upamanyu},
+  journal={arXiv preprint arXiv:2002.10791},
+  year={2020}
+}
+```
+
+```
+@inproceedings{fingerprinting2019globecom,
+ author = {Gopalakrishnan, Soorya and Cekic, Metehan and Madhow, Upamanyu},
+ booktitle = {IEEE Global Communications Conference (Globecom)},
+ location = {Waikoloa, Hawaii},
+ title = {Robust Wireless Fingerprinting via Complex-Valued Neural Networks},
+ year = {2019}
+}
+```
+
+
