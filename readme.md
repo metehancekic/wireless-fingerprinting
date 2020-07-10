@@ -7,41 +7,8 @@ This repository contains scripts to simulate the effect of channel and CFO varia
 
 We have created a simulation-based WiFi dataset based on models of some typical nonlinearities. We implement two different kinds of circuit-level impairments: I/Q imbalance and power amplifier nonlinearity. Training dataset consists of 200 signals per device for 19 devices (classes). The validation and test sets contain 100 signals per device. Overall, the dataset contains 3800 signals for training, 1900 signals for validation and 1900 signals for the test set. The dataset can be downloaded as an npz file from [this Box link](https://ucsb.box.com/s/ddub4zlp2wbckk4l1v1785yw2aluzfru), and needs to be copied into the `data` subdirectory. 
 
-Further details can be found in our [paper](https://arxiv.org/pdf/2002.10791.pdf):
+Further details can be found in our paper at section 5e:
 
-## Module Structure #
-
-```
-project
-│   README.md
-│   cfo_channel_training_simulations.py     Training code for all the experiments
-│   cfo_channel_testing_simulations.py      Testing code from checkpoints
-│   configs_train.json          All hyper parameters for training
-│   configs_test.json           All hyper parameters for testing
-│   simulators.py               All simulations (CFO, channel, residuals, etc) as functions
-│   experiment_setup.py         Experiment setup (use different day channel, cfo effects or not)
-│
-└───cxnn
-│   │   models.py                   Neural network architectures
-│   │   train.py                    Training function
-│   │   train_network_reim_mag.py   Training function for real and complex networks
-│   │ 
-│   └───complexnn
-│       │   complex-valued neural network implemantation codes
-│       │   ...
-│   
-└───preproc   
-│   │  fading_model.py      Signal processing tools (Fading models, etc)   
-│   │  preproc_wifi         Preprocessing tools (Equalization, etc)
-│
-└───tests
-│   │   test_aug_analysis.py        Signal processing tools (Fading models, etc)   
-│   │   visualize_offset.py         Preprocessing tools (Equalization, etc)   
-│
-└───data
-    │   simulations.npz     Simulated WiFi dataset
-    │   
-```
 
 ## Prerequisites #
 
@@ -175,4 +142,38 @@ Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MI
  title = {Robust Wireless Fingerprinting via Complex-Valued Neural Networks},
  year = {2019}
 }
+```
+
+## Module Structure #
+
+```
+project
+│   README.md
+│   cfo_channel_training_simulations.py     Training code for all the experiments
+│   cfo_channel_testing_simulations.py      Testing code from checkpoints
+│   configs_train.json          All hyper parameters for training
+│   configs_test.json           All hyper parameters for testing
+│   simulators.py               All simulations (CFO, channel, residuals, etc) as functions
+│   experiment_setup.py         Experiment setup (use different day channel, cfo effects or not)
+│
+└───cxnn
+│   │   models.py                   Neural network architectures
+│   │   train.py                    Training function
+│   │   train_network_reim_mag.py   Training function for real and complex networks
+│   │ 
+│   └───complexnn
+│       │   complex-valued neural network implemantation codes
+│       │   ...
+│   
+└───preproc   
+│   │  fading_model.py      Signal processing tools (Fading models, etc)   
+│   │  preproc_wifi         Preprocessing tools (Equalization, etc)
+│
+└───tests
+│   │   test_aug_analysis.py        Signal processing tools (Fading models, etc)   
+│   │   visualize_offset.py         Preprocessing tools (Equalization, etc)   
+│
+└───data
+    │   simulations.npz     Simulated WiFi dataset
+    │   
 ```
