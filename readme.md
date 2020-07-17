@@ -101,8 +101,8 @@ test setup:
 Running code with different day scenario (channel, cfo):
 
 ```bash
-KERAS_BACKEND=theano python cfo_channel_training_simulations.py --phsical_channel --physical_cfo --augment_channel --augment_cfo
-KERAS_BACKEND=theano python cfo_channel_testing_simulations.py --phsical_channel --physical_cfo --augment_channel --augment_cfo --augment_channel_test --augment_cfo_test
+KERAS_BACKEND=theano python cfo_channel_training_simulations.py --physical_channel --physical_cfo --augment_channel --augment_cfo
+KERAS_BACKEND=theano python cfo_channel_testing_simulations.py --physical_channel --physical_cfo --augment_channel --augment_cfo --augment_channel_test --augment_cfo_test
 ```
 
 ## Module Structure #
