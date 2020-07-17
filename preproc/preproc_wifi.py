@@ -19,6 +19,9 @@ from sklearn.preprocessing import normalize
 
 
 def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, progress=True):
+    '''
+    Detects preamble and extract its
+    '''
 
     signal_indices = range(len(data_dict['data_file']))
     if progress is True:
@@ -90,6 +93,10 @@ def preprocess_wifi(data_dict, sample_duration, sample_rate, preprocess_type=1, 
 
 
 def frac_eq_preamble(rx, verbose=False):
+    '''
+    Fractionally equalize preamble
+    https://ieeexplore.ieee.org/document/489269
+    '''
 
     # print('Hello!')
 
@@ -129,8 +136,9 @@ def frac_eq_preamble(rx, verbose=False):
 
 
 def detect_frame(complex_signal, lowFreq, upFreq, Fc, verbose=False):
-
-    # print('Hello--')
+    '''
+    Detects preamble and extract its
+    '''
 
     Fs = 200e6
     flag = 0
@@ -1027,6 +1035,9 @@ def get_sliding_window(x, window_size=10, stride=1, fs=200e6, fs_natural=20e6):
 
 
 def read_wifi(files, base_data_directory, device_map, progress=True):
+    '''
+    Read wifi data frin data directory
+    '''
 
     csv = files['csv_objects'].items()
     if progress is True:
@@ -1093,6 +1104,9 @@ def read_wifi(files, base_data_directory, device_map, progress=True):
 
 
 def parse_input_files(input_csv, devices_csv):
+    '''
+    Parser for wifi dataset
+    '''
     device_list = []  # a list of the devices to be trained/tested with
     device_map = {}   # a reverse map from device name to index
     csv_objects = {}  # a dictionary with filenames for keys, lists of signals as values
@@ -1116,6 +1130,10 @@ def parse_input_files(input_csv, devices_csv):
 
 
 def get_json_signal(json_annotations, capture, signal_id, type=None):
+    '''
+    Get signal from json
+    '''
+
     for signal in json_annotations:
         if signal != {} and signal['capture_details:signal_reference_number'] == signal_id:
             if 'rfml:label' in signal:
@@ -1151,6 +1169,10 @@ def get_json_signal(json_annotations, capture, signal_id, type=None):
 
 
 def read_sample(filename, start_sample, sample_count, desired_buffer):
+    ''' 
+    Read samples
+    '''
+
     buffer_start = min(desired_buffer, start_sample)
     buffer_end = desired_buffer
     sample_count += (buffer_start + buffer_end)

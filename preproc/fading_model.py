@@ -62,6 +62,9 @@ def add_custom_fading_channel(frame,
                               channel_type=1,
                               channel_method='FFT',
                               noise_method='reg'):
+    '''
+    Passes given signal through fading channel
+    '''
 
     epa_delay = np.array([0, 30, 70, 90, 110, 190, 410], dtype=np.float64)
     epa_power = np.array([0.0, -1.0, -2.0, -3.0, -8.0, -17.2, -20.8])
@@ -169,6 +172,9 @@ def add_custom_fading_channel(frame,
 
 
 def add_noise(data_dict, snr=20, progress=True):
+    '''
+    Adds additive gaussian noise to given signal
+    '''
 
     signal_indices = range(len(data_dict['data_file']))
     if progress is True:
@@ -193,6 +199,9 @@ def add_noise(data_dict, snr=20, progress=True):
 
 
 def add_fading_channel(data_dict, seed=0, snr=20, beta=0.5, num_ch=1, progress=True, sample_duration=20.):
+    '''
+    Passes given signal through fading channel
+    '''
 
     signal_indices = range(len(data_dict['data_file']))
     if progress is True:
@@ -274,6 +283,10 @@ def add_fading_channel(data_dict, seed=0, snr=20, beta=0.5, num_ch=1, progress=T
 
 
 def fft_add_fading_channel_to_frame(frame, snr, sampling_rate, seed=0, beta=None):
+    '''
+    Passes given signal through fading channel (in frequency domain)
+    '''
+
     if sampling_rate != 20e6:
         raise ValueError('Fs must be 20e6 to use FFT method')
     Fs = 20e6
@@ -317,6 +330,10 @@ def fft_add_fading_channel_to_frame(frame, snr, sampling_rate, seed=0, beta=None
 
 
 def fft_add_fading_channel_to_frame_200(frame, snr, sampling_rate, seed=0, beta=None):
+    '''
+    Passes given signal through fading channel (in frequency domain)
+    For 200 mhz sampling rate
+    '''
     if sampling_rate != 200e6:
         raise ValueError('Fs must be 20e6 to use FFT method')
     Fs = 2e6
