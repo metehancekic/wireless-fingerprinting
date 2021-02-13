@@ -7,7 +7,7 @@ This repository contains scripts to simulate the effect of channel and CFO varia
 
 We have created a simulation-based WiFi dataset based on models of some typical nonlinearities. We implement two different kinds of circuit-level impairments: I/Q imbalance and power amplifier nonlinearity. Training dataset consists of 200 signals per device for 19 devices (classes). The validation and test sets contain 100 signals per device. Overall, the dataset contains 3800 signals for training, 1900 signals for validation and 1900 signals for the test set. The dataset can be downloaded as an npz file from [this Box link](https://ucsb.box.com/s/ddub4zlp2wbckk4l1v1785yw2aluzfru), and needs to be copied into the `data` subdirectory. 
 
-Further details can be found in our paper at section 5e:
+Further details can be found in our paper.
 
 
 ## Building the environment and running the code #
@@ -145,14 +145,6 @@ Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MI
 
 ## Citation
 
-```
-@article{fingerpinting2020,
-  title={Robust Wireless Fingerprinting: Generalizing Across Space and Time},
-  author={Cekic, Metehan and Gopalakrishnan, Soorya and Madhow, Upamanyu},
-  journal={arXiv preprint arXiv:2002.10791},
-  year={2020}
-}
-```
 
 ```
 @inproceedings{fingerprinting2019globecom,
