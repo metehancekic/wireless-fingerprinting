@@ -1,4 +1,4 @@
-# Robust Wireless Fingerprinting: Generalizing Across Space and Time #
+# Repository of paper: Wireless Fingerprinting via Deep Learning: The Impact of Confounding Factors #
 
 
 This repository contains scripts to simulate the effect of channel and CFO variations on wireless fingerprinting using complex-valued CNNs. This repo also has simulation-based dataset based on models of some typical nonlinearities. It includes augmentation techniques, estimation techniques, and combinations of the two. The repository consists of 4 folders; namely, cxnn, preproc, tests, data, and a number of scripts outside of these folders (in the main folder). 
