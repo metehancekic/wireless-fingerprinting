@@ -154,6 +154,16 @@ Complex layers are from Trabelsi et al, "Deep Complex Networks", *ICLR 2018* (MI
  title = {Robust Wireless Fingerprinting via Complex-Valued Neural Networks},
  year = {2019}
 }
+
+@INPROCEEDINGS{9723393,
+  author={Cekic, Metehan and Gopalakrishnan, Soorya and Madhow, Upamanyu},
+  booktitle={2021 55th Asilomar Conference on Signals, Systems, and Computers}, 
+  title={Wireless Fingerprinting via Deep Learning: The Impact of Confounding Factors}, 
+  year={2021},
+  volume={},
+  number={},
+  pages={677-684},
+  doi={10.1109/IEEECONF53345.2021.9723393}}
 ```
 
 
